@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <unistd.h>
 
+#include "sdlhwcontext.h"
 #include "utils.h"
 
 #define WIDTH 84
@@ -13,11 +14,7 @@
 #define BPP 4
 #define DEPTH 32
 
-struct HWContext
-{
-    int data_fd;
-    void *screen_buf;
-};
+void shell_main(void *hwcontext);
 
 void sdl_setpixel(SDL_Surface *screen, int x, int y, Uint8 r, Uint8 g, Uint8 b)
 {
@@ -60,16 +57,12 @@ void sdl_draw_screen(SDL_Surface* screen, uint8_t *screen_buf)
     SDL_Flip(screen);
 }
 
-void *ui_loop(void *arg)
+void *ui_start(void *arg)
 {
     struct HWContext *hw = (struct HWContext *) arg;
 
-    char c;
-
-    do {
-        memset(hw->screen_buf, 0, (WIDTH * HEIGHT / 8));
-        read(hw->data_fd, &c, 1);
-    } while(c != 'q');
+    memset(hw->screen_buf, 0, (WIDTH * HEIGHT / 8));
+    shell_main(arg);
 
     return NULL;
 }
@@ -107,7 +100,7 @@ int main(int argc, char* argv[])
     pthread_t thread_id;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
-    pthread_create(&thread_id, &attr, ui_loop, hw);
+    pthread_create(&thread_id, &attr, ui_start, hw);
 
     while(!quit) {
 
