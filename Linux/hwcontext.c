@@ -3,14 +3,18 @@
 #include "utils.h"
 
 #include <stdint.h>
+#include <time.h>
 #include <unistd.h>
 
-int hwcontext_get_key_code(void *hw_context)
+char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *timestamp)
 {
-    struct HWContext *hw = (struct HWContext *) hw_context;
+    struct HWContext *hw = (struct HWContext *) hwcontext;
 
     char c;
     read(hw->data_fd, &c, 1);
+    *pressed = 0;
+
+    clock_gettime(CLOCK_MONOTONIC, timestamp);
 
     return c;
 }
