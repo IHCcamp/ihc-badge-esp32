@@ -1,6 +1,13 @@
 #include "hwcontext.h"
 #include "esp32hwcontext.h"
 
+int hwcontext_get_key_code(void *hw_context)
+{
+    while (1) {
+    }
+    return 42;
+}
+
 uint8_t *hwcontext_get_framebuffer(void *hw_context)
 {
     struct HWContext *hw = (struct HWContext *) hw_context;
