@@ -1,6 +1,5 @@
 #include "hwcontext.h"
 #include "painter.h"
-#include "esp_log.h"
 
 #include <stdio.h>
 
