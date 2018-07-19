@@ -6,7 +6,10 @@
 #include "sdlhwcontext.h"
 #include "utils.h"
 
-#define WIDTH 84
+#define SCREEN_WIDTH 84
+#define SCREEN_HEIGHT 48
+
+#define WIDTH (84 + 4)
 #define HEIGHT 48
 
 #define SDL_WIDTH (WIDTH * 8)
@@ -32,8 +35,8 @@ void sdl_draw_screen(SDL_Surface* screen, uint8_t *screen_buf)
         }
     }
 
-    for (int y = 0; y < HEIGHT; y++ ) {
-        for (int x = 0; x < WIDTH; x++ ) {
+    for (int y = 0; y < SCREEN_HEIGHT; y++ ) {
+        for (int x = 0; x < SCREEN_WIDTH; x++ ) {
             int color;
 
             int pixel_byte = ((y / 8) * WIDTH) + x;
@@ -61,9 +64,6 @@ void sdl_draw_screen(SDL_Surface* screen, uint8_t *screen_buf)
 
 void *ui_start(void *arg)
 {
-    struct HWContext *hw = (struct HWContext *) arg;
-
-    memset(hw->screen_buf, 0, (WIDTH * HEIGHT / 8));
     shell_main(arg);
 
     return NULL;
@@ -89,12 +89,15 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    memset(screen->pixels, 0x80, SDL_WIDTH * SDL_HEIGHT * BPP);
+
     int fds[2];
     pipe(fds);
 
     uint8_t *screen_buf = malloc((WIDTH * HEIGHT) / 8);
     struct HWContext *hw = malloc(sizeof(struct HWContext));
     hw->screen_buf = screen_buf;
+    memset(hw->screen_buf, 0, (WIDTH * HEIGHT / 8));
     hw->data_fd = fds[0];
 
     int write_fd = fds[1];

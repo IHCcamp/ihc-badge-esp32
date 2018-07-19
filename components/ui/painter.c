@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define WIDTH 84
+#define WIDTH (84 + 4) // last pixels are discarded
 #define HEIGHT 48
 
 void painter_draw_h_line(void *hwcontext, int x, int y, int width, int color)
