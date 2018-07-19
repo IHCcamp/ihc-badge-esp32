@@ -12,11 +12,11 @@ char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *time
 
     char c;
     read(hw->data_fd, &c, 1);
-    *pressed = 0;
+    *pressed = !(c & 0x80);
 
     clock_gettime(CLOCK_MONOTONIC, timestamp);
 
-    return c;
+    return c & 0x7F;
 }
 
 uint8_t *hwcontext_get_framebuffer(void *hw_context)

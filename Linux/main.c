@@ -119,6 +119,17 @@ int main(int argc, char* argv[])
                     write(write_fd, &quit_c, 1);
 	            break;
 
+                case SDL_KEYDOWN: {
+                    uint8_t key = event.key.keysym.sym;
+                    write(write_fd, &key, 1);
+                }
+                break;
+
+                case SDL_KEYUP: {
+                    uint8_t key = ((uint8_t) (event.key.keysym.sym)) | 0x80;
+                    write(write_fd, &key, 1);
+                }
+
                 default:
                     break;
             }
