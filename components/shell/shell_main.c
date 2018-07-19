@@ -1,5 +1,6 @@
 #include "hwcontext.h"
 #include "painter.h"
+#include "esp_log.h"
 
 #include <stdio.h>
 
@@ -9,8 +10,10 @@ void shell_main(void *hwcontext)
     hwcontext_update_screen(hwcontext);
 
     int c;
+    int pressed;
+    struct timespec ts;
     do {
-        c = hwcontext_get_key_code(hwcontext);
-        printf("last char: %c\n", c);
-    } while(c != 'q');
+        c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
+        printf("last char: %c pressed: %d timestamp: secs %ld nsecs %ld\n", c, pressed, ts.tv_sec, ts.tv_nsec);
+    } while (c != 'C');
 }

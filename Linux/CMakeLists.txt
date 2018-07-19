@@ -5,7 +5,7 @@ if(CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 find_package(SDL REQUIRED)
-include_directories(${SDL_INCLUDE_DIR} ../components/shell/include ../components/ui/include)
+include_directories(${SDL_INCLUDE_DIR} ../components/shell/include ../components/ui/include ../components/hwcontext/include)
 
 add_executable(ihc-badge-esp32 main.c hwcontext.c ../components/shell/shell_main.c ../components/ui/painter.c)
 target_link_libraries(ihc-badge-esp32  ${SDL_LIBRARY})

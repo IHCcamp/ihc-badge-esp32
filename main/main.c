@@ -1,4 +1,5 @@
 #include <esp_log.h>
+#include "driver/uart.h"
 #include "esp32hwcontext.h"
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
@@ -8,6 +9,8 @@
 #define PIN_RESET 33
 #define PIN_DC 5
 #define PIN_CS 32
+
+#define UART_BUF_SIZE 1024
 
 void init_display(struct HWContext *hw_context) {
     u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
@@ -34,6 +37,21 @@ void init_display(struct HWContext *hw_context) {
     hw_context->u8g2 = u8g2;
 }
 
+void init_serial()
+{
+    const int uart_num = UART_NUM_0;
+    uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
+    // Configure UART parameters
+    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, UART_BUF_SIZE * 2, 0, 0, NULL, 0));
+}
+
 void app_main()
 {
     const char tag[] = "app_main";
@@ -42,6 +60,7 @@ void app_main()
 
     struct HWContext *hw_context = malloc(sizeof(struct HWContext));
     init_display(hw_context);
+    init_serial();
 
     shell_main(hw_context);
 }
