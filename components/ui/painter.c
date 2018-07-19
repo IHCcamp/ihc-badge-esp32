@@ -1,10 +1,18 @@
 #include "painter.h"
 #include "hwcontext.h"
 
+#include <string.h>
 #include <stdint.h>
 
 #define WIDTH (84 + 4) // last pixels are discarded
 #define HEIGHT 48
+
+void painter_clear_screen(void *hwcontext)
+{
+    uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
+
+    memset(fb, 0, (WIDTH * HEIGHT) / 8);
+}
 
 void painter_draw_h_line(void *hwcontext, int x, int y, int width, int color)
 {
