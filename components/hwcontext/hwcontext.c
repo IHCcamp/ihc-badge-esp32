@@ -82,6 +82,8 @@ char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *time
             case '8':
             case '9':
             case '0':
+            case '*':
+            case '#':
             case 'U':
             case 'D':
             case 'C':
