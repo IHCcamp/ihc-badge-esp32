@@ -1,5 +1,6 @@
 #include "hwcontext.h"
 #include "sdlhwcontext.h"
+#include "utils.h"
 
 #include <stdint.h>
 #include <unistd.h>
@@ -18,4 +19,9 @@ uint8_t *hwcontext_get_framebuffer(void *hw_context)
 {
     struct HWContext *hw = (struct HWContext *) hw_context;
     return hw->screen_buf;
+}
+
+void hwcontext_update_screen(void *hw_context)
+{
+    UNUSED(hw_context);
 }
