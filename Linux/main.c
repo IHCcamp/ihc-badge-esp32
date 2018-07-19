@@ -32,11 +32,14 @@ void sdl_draw_screen(SDL_Surface* screen, uint8_t *screen_buf)
         }
     }
 
-    int pixel_index = 0;
     for (int y = 0; y < HEIGHT; y++ ) {
         for (int x = 0; x < WIDTH; x++ ) {
             int color;
-            if (screen_buf[pixel_index / 8] & (1 << (pixel_index % 8))) {
+
+            int pixel_byte = ((y / 8) * WIDTH) + x;
+            int pixel_bit = (y % 8);
+
+            if (screen_buf[pixel_byte] & (1 << pixel_bit)) {
                 color = 0;
             } else {
                 color = 255;
@@ -46,7 +49,6 @@ void sdl_draw_screen(SDL_Surface* screen, uint8_t *screen_buf)
                   sdl_setpixel(screen, x_dest, y_dest, color, color, color);
                 }
             }
-            pixel_index++;
         }
     }
 
