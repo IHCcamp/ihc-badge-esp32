@@ -6,6 +6,7 @@
 void shell_main(void *hwcontext)
 {
     painter_draw_h_line(hwcontext, 2, 4, 30, PAINTER_BLACK);
+    hwcontext_update_screen(hwcontext);
 
     int c;
     do {
