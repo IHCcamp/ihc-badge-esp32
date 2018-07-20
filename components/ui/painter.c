@@ -88,6 +88,13 @@ void painter_draw_rect(void *hwcontext, int x, int y, int width, int height, int
     painter_draw_v_line(hwcontext, x + width - 1, y, height - 1, color);
 }
 
+void painter_draw_fill_rect(void *hwcontext, int x, int y, int width, int height, int color)
+{
+    for (int x_pos = x; x_pos < x + width; x_pos++) {
+        painter_draw_v_line(hwcontext, x_pos, y, height, color);
+    }
+}
+
 void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int y, int width, int height)
 {
     uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
