@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include "ihc_logo.xbm"
+
 void shell_main(void *hwcontext)
 {
     int x_pos = 0;
@@ -12,6 +14,7 @@ void shell_main(void *hwcontext)
     int pressed;
     struct timespec ts;
 
+    painter_clear_screen(hwcontext);
     painter_draw_rect(hwcontext, 5, 5, 74, 38, PAINTER_BLACK);
     hwcontext_update_screen(hwcontext);
 
@@ -20,6 +23,7 @@ void shell_main(void *hwcontext)
         printf("last char: %c pressed: %d timestamp: secs %ld nsecs %ld\n", c, pressed, ts.tv_sec, ts.tv_nsec);
 
         painter_clear_screen(hwcontext);
+        painter_draw_xbm(hwcontext, ihc_logo_bits, 0, 0, ihc_logo_width, ihc_logo_height);
         painter_draw_rect(hwcontext, 5, 5, 74, 38, PAINTER_BLACK);
         if (pressed) {
             switch (c) {
