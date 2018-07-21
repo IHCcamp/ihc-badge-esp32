@@ -115,7 +115,7 @@ void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int
     }
 }
 
-void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style)
+void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style, int color)
 {
     const int *offsets;
     const uint8_t *widths;
@@ -149,7 +149,11 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text, int st
         x_pos += c_width;
 
         for (int i = off; i < off + c_width; i++) {
-            fb[j] = font_data[i];
+            if (color == PAINTER_BLACK) {
+                fb[j] |= font_data[i];
+            } else {
+                fb[j] &= ~(font_data[i]);
+            }
             j++;
         }
 

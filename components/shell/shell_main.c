@@ -16,19 +16,36 @@ void shell_main(void *hwcontext)
     int pressed;
     struct timespec ts;
 
+    const char *const choices[] = {
+        "Booting",
+        "Lisa Frank 420",
+        "Flower Shoppe",
+        "Library",
+        "Geography",
+        "Chill Divin' with ECCO",
+        "Mathematics",
+        "Foreign Banks Av...",
+        "Te",
+        "Moon",
+        "Seabed"
+    };
+
+    int choice = ui_show_menu(hwcontext, 11, choices, 2);
+
+    ui_show_message(hwcontext, choices[choice]);
     ui_show_message(hwcontext, "Ready?");
 
     for (int i = 10; i >= 0; i--) {
         char buf[3];
         sprintf(buf, "%i", i);
         painter_clear_screen(hwcontext);
-        painter_draw_text(hwcontext, 40, 2, buf, PAINTER_FONT_REGULAR);
+        painter_draw_text(hwcontext, 40, 2, buf, PAINTER_FONT_REGULAR, PAINTER_BLACK);
         hwcontext_update_screen(hwcontext);
         hwcontext_delay_ms(hwcontext, 1000);
     }
 
     painter_clear_screen(hwcontext);
-    painter_draw_text(hwcontext, 20, 2, "Hello 3310!", PAINTER_FONT_REGULAR);
+    painter_draw_text(hwcontext, 20, 2, "Hello 3310!", PAINTER_FONT_REGULAR, PAINTER_BLACK);
     hwcontext_update_screen(hwcontext);
     hwcontext_delay_ms(hwcontext, 1000);
 
