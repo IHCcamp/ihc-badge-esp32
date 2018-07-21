@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -16,6 +17,8 @@ char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *time
     *pressed = !(c & 0x80);
 
     clock_gettime(CLOCK_MONOTONIC, timestamp);
+
+    fprintf(stderr, "key: %c, pressed: %i\n", c, *pressed);
 
     return toupper(c & 0x7F);
 }
