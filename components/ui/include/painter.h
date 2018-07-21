@@ -11,5 +11,6 @@ void painter_draw_pixel(void *hwcontext, int x, int y, int color);
 void painter_draw_rect(void *hwcontext, int x, int y, int width, int height, int color);
 void painter_draw_fill_rect(void *hwcontest, int x, int y, int width, int height, int color);
 void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int y, int width, int height);
+void painter_draw_text(void *hwcontext, int x, int row, const char *text);
 
 #endif
