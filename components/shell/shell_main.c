@@ -22,13 +22,13 @@ void shell_main(void *hwcontext)
         char buf[3];
         sprintf(buf, "%i", i);
         painter_clear_screen(hwcontext);
-        painter_draw_text(hwcontext, 40, 2, buf, PAINTER_FONT_REGULAR);
+        painter_draw_text(hwcontext, 40, 2, buf, PAINTER_FONT_REGULAR, PAINTER_BLACK);
         hwcontext_update_screen(hwcontext);
         hwcontext_delay_ms(hwcontext, 1000);
     }
 
     painter_clear_screen(hwcontext);
-    painter_draw_text(hwcontext, 20, 2, "Hello 3310!", PAINTER_FONT_REGULAR);
+    painter_draw_text(hwcontext, 20, 2, "Hello 3310!", PAINTER_FONT_REGULAR, PAINTER_BLACK);
     hwcontext_update_screen(hwcontext);
     hwcontext_delay_ms(hwcontext, 1000);
 
