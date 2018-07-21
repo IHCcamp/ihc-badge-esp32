@@ -1,5 +1,6 @@
 #include "hwcontext.h"
 #include "painter.h"
+#include "ui.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -14,6 +15,8 @@ void shell_main(void *hwcontext)
     int c;
     int pressed;
     struct timespec ts;
+
+    ui_show_message(hwcontext, "Ready?");
 
     for (int i = 10; i >= 0; i--) {
         char buf[3];
