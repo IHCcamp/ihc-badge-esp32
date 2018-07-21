@@ -2,6 +2,7 @@
 #include "painter.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "ihc_logo.xbm"
 
@@ -13,6 +14,15 @@ void shell_main(void *hwcontext)
     int c;
     int pressed;
     struct timespec ts;
+
+    for (int i = 10; i >= 0; i--) {
+        char buf[3];
+        sprintf(buf, "%i", i);
+        painter_clear_screen(hwcontext);
+        painter_draw_text(hwcontext, 40, 2, buf, PAINTER_FONT_REGULAR);
+        hwcontext_update_screen(hwcontext);
+        hwcontext_delay_ms(hwcontext, 1000);
+    }
 
     painter_clear_screen(hwcontext);
     painter_draw_rect(hwcontext, 5, 5, 74, 38, PAINTER_BLACK);
