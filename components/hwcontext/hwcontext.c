@@ -105,3 +105,7 @@ void hwcontext_update_screen(void *hw_context)
     struct HWContext *hw = (struct HWContext *) hw_context;
     u8g2_SendBuffer(hw->u8g2);
 }
+
+void hwcontext_delay_ms(void *hw_context, int mseconds){
+    vTaskDelay(mseconds / portTICK_PERIOD_MS);
+}
