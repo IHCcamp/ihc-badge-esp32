@@ -2,6 +2,7 @@
 #include "sdlhwcontext.h"
 #include "utils.h"
 
+#include <ctype.h>
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
@@ -16,7 +17,7 @@ char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *time
 
     clock_gettime(CLOCK_MONOTONIC, timestamp);
 
-    return c & 0x7F;
+    return toupper(c & 0x7F);
 }
 
 uint8_t *hwcontext_get_framebuffer(void *hw_context)
