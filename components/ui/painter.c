@@ -8,6 +8,8 @@
 #define WIDTH (84 + 4) // last pixels are discarded
 #define HEIGHT 48
 
+#define MAX_SCREEN_TEXT_ROWS (48 / 8)
+
 #define CHECK_BOUNDS() \
     if ((x < 0) || (x + width > PAINTER_SCREEN_WIDTH) || (y < 0) ||  (y + height > PAINTER_SCREEN_HEIGHT)) { \
         fprintf(stderr, "Skipped draw\n"); \
@@ -130,6 +132,10 @@ void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int
 
 void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style, int color)
 {
+    if ((row < 0) || (row > MAX_SCREEN_TEXT_ROWS)) {
+        fprintf(stderr, "Skipping draw text outside bounds\n");
+    }
+
     const int *offsets;
     const uint8_t *widths;
     const uint8_t *font_data;
@@ -158,6 +164,11 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text, int st
             x_pos = x;
             row++;
             j = row * WIDTH + x;
+
+            if (row > MAX_SCREEN_TEXT_ROWS) {
+                fprintf(stderr, "Text has been truncated.\n");
+                return;
+            }
         }
         x_pos += c_width;
 
