@@ -25,6 +25,11 @@ void shell_main(void *hwcontext)
     }
 
     painter_clear_screen(hwcontext);
+    painter_draw_text(hwcontext, 20, 2, "Hello 3310!", PAINTER_FONT_REGULAR);
+    hwcontext_update_screen(hwcontext);
+    hwcontext_delay_ms(hwcontext, 1000);
+
+    painter_clear_screen(hwcontext);
     painter_draw_rect(hwcontext, 5, 5, 74, 38, PAINTER_BLACK);
     hwcontext_update_screen(hwcontext);
 
