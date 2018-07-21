@@ -156,3 +156,24 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text, int st
         text++;
     }
 }
+
+int painter_painted_text_width(const char *text, int style)
+{
+    const uint8_t *widths;
+
+    if (style == PAINTER_FONT_REGULAR) {
+        widths = font_small_plain_pixel_widths;
+    } else {
+        widths = font_small_bold_pixel_widths;
+    }
+
+    int acc = 0;
+    while (*text) {
+        int font_index = *text - 0x20;
+
+        acc = widths[font_index];
+        text++;
+    }
+
+    return acc;
+}
