@@ -142,7 +142,7 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text, int st
         int c_width = widths[font_index];
 
         if (x_pos + c_width > WIDTH) {
-            x_pos = 0;
+            x_pos = x;
             row++;
             j = row * WIDTH + x;
         }
