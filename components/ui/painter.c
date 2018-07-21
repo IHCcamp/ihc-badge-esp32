@@ -8,6 +8,7 @@
 #define HEIGHT 48
 
 #include "font_small_plain.c"
+#include "font_small_bold.c"
 
 static inline void put_pixel(uint8_t *fb, int x, int y, int color)
 {
@@ -114,8 +115,22 @@ void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int
     }
 }
 
-void painter_draw_text(void *hwcontext, int x, int row, const char *text)
+void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style)
 {
+    const int *offsets;
+    const uint8_t *widths;
+    const uint8_t *font_data;
+
+    if (style == PAINTER_FONT_REGULAR) {
+        offsets = font_small_plain_offsets;
+        widths = font_small_plain_pixel_widths;
+        font_data = font_small_plain_font_data;
+    } else {
+        offsets = font_small_bold_offsets;
+        widths = font_small_bold_pixel_widths;
+        font_data = font_small_bold_font_data;
+    }
+
     uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
 
     int x_pos = x;
@@ -123,8 +138,8 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text)
     while (*text) {
         int font_index = *text - 0x20;
 
-        int off = font_small_plain_offsets[font_index];
-        int c_width = font_small_plain_pixel_widths[font_index];
+        int off = offsets[font_index];
+        int c_width = widths[font_index];
 
         if (x_pos + c_width > WIDTH) {
             x_pos = 0;
@@ -134,7 +149,7 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text)
         x_pos += c_width;
 
         for (int i = off; i < off + c_width; i++) {
-            fb[j] = font_small_plain_font_data[i];
+            fb[j] = font_data[i];
             j++;
         }
 
