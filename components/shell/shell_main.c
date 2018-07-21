@@ -16,6 +16,8 @@ void shell_main(void *hwcontext)
     int pressed;
     struct timespec ts;
 
+    ui_show_message(hwcontext, "Ready?");
+
     for (int i = 10; i >= 0; i--) {
         char buf[3];
         sprintf(buf, "%i", i);
