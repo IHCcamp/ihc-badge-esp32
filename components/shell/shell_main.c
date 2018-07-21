@@ -1,5 +1,6 @@
 #include "hwcontext.h"
 #include "painter.h"
+#include "ui.h"
 
 #include <stdio.h>
 #include <string.h>
