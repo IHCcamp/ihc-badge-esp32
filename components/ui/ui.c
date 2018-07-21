@@ -38,7 +38,7 @@ int ui_show_menu(void *hwcontext, int num_entries, const char * const *entries, 
         } else if (!pressed && (c == 'D') && (current_entry < num_entries - 1)) {
             current_entry++;
         }
-    } while ((c != 'M') || !pressed);
+    } while ((c != 'M') || pressed);
 
     return current_entry;
 }
@@ -69,5 +69,5 @@ static void wait_menu_key_press(void *hwcontext)
     do {
         struct timespec ts;
         c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
-    } while ((c != 'M') || (pressed != 0));
+    } while ((c != 'M') || pressed);
 }
