@@ -29,3 +29,8 @@ void hwcontext_update_screen(void *hw_context)
 {
     UNUSED(hw_context);
 }
+
+void hwcontext_delay_ms(void *hw_context, int mseconds){
+	UNUSED(hw_context);
+	usleep(mseconds * 1000);
+}
