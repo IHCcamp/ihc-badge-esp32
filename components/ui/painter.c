@@ -3,9 +3,16 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define WIDTH (84 + 4) // last pixels are discarded
 #define HEIGHT 48
+
+#define CHECK_BOUNDS() \
+    if ((x < 0) || (x + width > PAINTER_SCREEN_WIDTH) || (y < 0) ||  (y + height > PAINTER_SCREEN_HEIGHT)) { \
+        fprintf(stderr, "Skipped draw\n"); \
+        return; \
+    }
 
 #include "font_small_plain.c"
 #include "font_small_bold.c"
@@ -85,6 +92,8 @@ void painter_draw_v_line(void *hwcontext, int x, int y, int height, int color)
 
 void painter_draw_rect(void *hwcontext, int x, int y, int width, int height, int color)
 {
+    CHECK_BOUNDS();
+
     painter_draw_h_line(hwcontext, x, y, width, color);
     painter_draw_h_line(hwcontext, x, y + height - 1, width, color);
     painter_draw_v_line(hwcontext, x, y, height - 1, color);
@@ -93,6 +102,8 @@ void painter_draw_rect(void *hwcontext, int x, int y, int width, int height, int
 
 void painter_draw_fill_rect(void *hwcontext, int x, int y, int width, int height, int color)
 {
+    CHECK_BOUNDS();
+
     for (int x_pos = x; x_pos < x + width; x_pos++) {
         painter_draw_v_line(hwcontext, x_pos, y, height, color);
     }
@@ -100,6 +111,8 @@ void painter_draw_fill_rect(void *hwcontext, int x, int y, int width, int height
 
 void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int y, int width, int height)
 {
+    CHECK_BOUNDS();
+
     uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
 
     int src_width = width + (8 - (width % 8));
