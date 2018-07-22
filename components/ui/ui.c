@@ -1,7 +1,10 @@
 #include "hwcontext.h"
+#include "input.h"
 #include "painter.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define ROW_HEIGHT 8
@@ -60,6 +63,33 @@ static void display_menu(void *hwcontext, int num_entries, const char * const *e
         painter_draw_text(hwcontext, 1, i, entries[first_visible_entry + i], PAINTER_FONT_REGULAR, color);
     }
     hwcontext_update_screen(hwcontext);
+}
+
+char *ui_ask_user_input(void *hwcontext, const char *message)
+{
+    painter_clear_screen(hwcontext);
+    painter_draw_text(hwcontext, 0, 0, message, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+    hwcontext_update_screen(hwcontext);
+    char c;
+    int pressed;
+    struct timespec ts;
+    struct EditingState es;
+    input_init_editing_state(&es);
+    do {
+        c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
+        input_consume_key_event(&es, c, pressed, &ts);
+        painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 2, PAINTER_WHITE);
+        painter_draw_text(hwcontext, 0, 2, es.buffer, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+        hwcontext_update_screen(hwcontext);
+    } while ((c != 'M') || (pressed != 0));
+
+    if (es.last_char < 0) {
+        return NULL;
+    }
+
+    // Buffer length is last_char + 1 + 1 for NULL terminator
+    size_t length = es.last_char + 2;
+    return strndup(es.buffer, length);
 }
 
 static void wait_menu_key_press(void *hwcontext)

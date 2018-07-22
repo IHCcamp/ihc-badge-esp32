@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "ihc_logo.xbm"
 
@@ -34,6 +35,13 @@ void shell_main(void *hwcontext)
 
     ui_show_message(hwcontext, choices[choice]);
     ui_show_message(hwcontext, "Ready?");
+    char *in = ui_ask_user_input(hwcontext, "Write stuff");
+    if (in) {
+        ui_show_message(hwcontext, in);
+    } else {
+        ui_show_message(hwcontext, "You're lazy");
+    }
+    free(in);
 
     for (int i = 10; i >= 0; i--) {
         char buf[3];
