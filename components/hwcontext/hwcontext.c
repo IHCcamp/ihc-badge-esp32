@@ -54,7 +54,7 @@ char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *time
 
         TickType_t ticks = xTaskGetTickCount();
         timestamp->tv_sec = (ticks * portTICK_PERIOD_MS) / 1000;
-        timestamp->tv_nsec = (ticks * portTICK_PERIOD_MS) * 1000;
+        timestamp->tv_nsec = ((ticks * portTICK_PERIOD_MS) % 1000) * 1000000;
 
         switch (buf[PRESSED_IDX]) {
             case 'D':
