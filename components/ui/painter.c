@@ -75,8 +75,8 @@ void painter_draw_v_line(void *hwcontext, int x, int y, int height, int color)
 
     if (color == PAINTER_WHITE) {
         for (int i = y; i < y + height; i++) {
-            int pixel_byte = ((y / 8) * WIDTH) + x;
-            int pixel_bit = (y % 8);
+            int pixel_byte = ((i / 8) * WIDTH) + x;
+            int pixel_bit = (i % 8);
             uint8_t block = ~(1 << pixel_bit);
 
             fb[pixel_byte] &= block;
