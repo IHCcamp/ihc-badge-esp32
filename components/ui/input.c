@@ -1,5 +1,6 @@
 #include "input.h"
 #include <ctype.h>
+#include <string.h>
 
 #define RELEASED_STATE 0
 #define PRESSED_STATE 1
@@ -131,6 +132,20 @@ static void set_current_char(struct EditingState *state, char c)
     }
 
     state->buffer[state->last_char] = c;
+}
+
+void input_init_editing_state(struct EditingState *state)
+{
+    struct timespec ts = {
+        .tv_sec = 0,
+        .tv_nsec = 0
+    };
+    state->last_char = -1;
+    state->upper_case = 0;
+    state->last_key = '\x00';
+    state->last_pressed_state = -1;
+    state->last_timestamp = ts;
+    memset(state->buffer, 0, EDITING_BUFFER_LEN);
 }
 
 void input_consume_key_event(struct EditingState *state, char key, int pressed, const struct timespec *ts)

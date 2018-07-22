@@ -17,6 +17,7 @@ struct EditingState
     const char *char_choices;
 };
 
+void input_init_editing_state(struct EditingState *state);
 void input_consume_key_event(struct EditingState *state, char key, int pressed, const struct timespec *ts);
 
 #endif
