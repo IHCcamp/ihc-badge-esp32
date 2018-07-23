@@ -46,6 +46,13 @@ int ui_show_menu(void *hwcontext, int num_entries, const char * const *entries, 
     return current_entry;
 }
 
+void ui_print_menu_button_label(void *hwcontext, const char *label)
+{
+    int label_width = painter_painted_text_width(label, PAINTER_FONT_BOLD);
+    painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - label_width) / 2, 5, label, PAINTER_FONT_BOLD, PAINTER_BLACK);
+    hwcontext_update_screen(hwcontext);
+}
+
 static void display_menu(void *hwcontext, int num_entries, const char * const *entries, int current_entry)
 {
     int first_visible_entry = (current_entry / 6) * 6;
