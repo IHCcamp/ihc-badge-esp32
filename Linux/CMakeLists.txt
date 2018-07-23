@@ -1,11 +1,34 @@
 cmake_minimum_required (VERSION 2.6)
+project (ihc-badge-linux)
+
+find_package(SDL REQUIRED)
 
 if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wextra -ggdb")
 endif()
 
-find_package(SDL REQUIRED)
-include_directories(${SDL_INCLUDE_DIR} ../components/shell/include ../components/ui/include ../components/hwcontext/include)
+include_directories(
+    ${SDL_INCLUDE_DIR}
 
-add_executable(ihc-badge-esp32 main.c hwcontext.c ../components/shell/shell_main.c ../components/shell/shell_menu.c ../components/ui/painter.c ../components/ui/ui.c ../components/ui/input.c)
-target_link_libraries(ihc-badge-esp32  ${SDL_LIBRARY})
+    include
+    ../components/hwcontext/include
+)
+
+set(LINUX_SOURCES
+    main.c
+    hwcontext.c
+)
+
+add_executable(ihc-badge-linux ${LINUX_SOURCES})
+
+target_link_libraries(ihc-badge-linux
+    # Apps
+    settings_app
+
+    # Libs
+    ui
+
+    # Misc
+    shell
+    ${SDL_LIBRARY}
+)
