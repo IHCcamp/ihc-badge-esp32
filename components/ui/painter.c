@@ -117,7 +117,7 @@ void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int
 
     uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
 
-    int src_width = width + (8 - (width % 8));
+    int src_width = ((width + 8 - 1) >> 3) << 3;
 
     for (int src_x = 0; src_x < width; src_x++) {
         for (int src_y = 0; src_y < height; src_y++) {
@@ -199,7 +199,7 @@ int painter_painted_text_width(const char *text, int style)
     while (*text) {
         int font_index = *text - 0x20;
 
-        acc = widths[font_index];
+        acc += widths[font_index];
         text++;
     }
 
