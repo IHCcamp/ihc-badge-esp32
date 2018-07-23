@@ -1,3 +1,6 @@
+#include "shell_menu.h"
+
+#include "appcontext.h"
 #include "hwcontext.h"
 #include "painter.h"
 #include "ui.h"
@@ -8,11 +11,11 @@
 
 #include "settings.xbm"
 
-typedef void (*app_main_t)(void *hwcontext);
+typedef void (*app_main_t)(struct AppContext *appctx);
 
-void settings_main(void *hwcontext)
+void settings_main(struct AppContext *appcontext)
 {
-    fprintf(stderr, "Henlo world: %p\n", hwcontext);
+    fprintf(stderr, "Henlo world: %p\n", appcontext);
 }
 
 struct MenuEntry
@@ -45,6 +48,7 @@ static void display_shell_menu(void *hwcontext, int current_entry)
 
     int title_width = painter_painted_text_width(menu_entries[current_entry].title, PAINTER_FONT_BOLD);
 
+    painter_clear_screen(hwcontext);
     painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - title_width) / 2, 1, menu_entries[current_entry].title, PAINTER_FONT_BOLD, PAINTER_BLACK);
     painter_draw_xbm(hwcontext, menu_entries[current_entry].menu_pixmap, 10, 20, 64, 14);
     painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - select_width) / 2, 5, "Select", PAINTER_FONT_REGULAR, PAINTER_BLACK);
@@ -74,7 +78,9 @@ void show_shell_menu(void *hwcontext)
     } while (((c != 'M') && ( c != 'C')) || pressed);
 
     if (c != 'C') {
-        menu_entries[current_entry].app_main(hwcontext);
+        struct AppContext appctx;
+        appctx.hwcontext = hwcontext;
+        menu_entries[current_entry].app_main(&appctx);
     }
 }
 
