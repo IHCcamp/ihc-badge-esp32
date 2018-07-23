@@ -24,6 +24,7 @@ target_link_libraries(shell
     ui
 
     # Apps
+    interp_app
     settings_app
 )
 
