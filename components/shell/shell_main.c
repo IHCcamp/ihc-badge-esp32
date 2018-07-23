@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "shell_menu.h"
+#include "battery_icon.xbm"
 #include "signal_icon.xbm"
 #include "startup.xbm"
 
@@ -25,6 +26,7 @@ static const uint8_t strength_icon_widths[] = {
 };
 
 static void draw_signal_status(void *hwcontext);
+static void draw_battery_status(void *hwcontext);
 
 void shell_main(void *hwcontext)
 {
@@ -38,6 +40,7 @@ void shell_main(void *hwcontext)
         painter_clear_screen(hwcontext);
         ui_print_menu_button_label(hwcontext, "Menu");
         draw_signal_status(hwcontext);
+        draw_battery_status(hwcontext);
 
         hwcontext_update_screen(hwcontext);
 
@@ -67,6 +70,28 @@ static void draw_signal_status(void *hwcontext)
         int height = strength_icon_heights[i];
         int width = strength_icon_widths[i];
         painter_draw_fill_rect(hwcontext, 0, y, width, height, PAINTER_BLACK);
+        if (i + 1 <= sizeof(strength_icon_widths)) {
+            y -= strength_icon_heights[i + 1] + 1;
+        }
+    }
+}
+
+static void draw_battery_status(void *hwcontext)
+{
+    uint8_t battery_charge = 100;
+
+    int y = 32;
+    int x = PAINTER_SCREEN_WIDTH - battery_icon_width;
+
+    painter_draw_xbm(hwcontext, battery_icon_bits, x, y, battery_icon_width, battery_icon_height);
+
+    y -= battery_icon_height + 1;
+
+    for (size_t i = 0; i < sizeof(strength_icon_heights) && battery_charge > i * 25; i++) {
+        int height = strength_icon_heights[i];
+        int width = strength_icon_widths[i];
+        int x = PAINTER_SCREEN_WIDTH - width;
+        painter_draw_fill_rect(hwcontext, x, y, width, height, PAINTER_BLACK);
         if (i + 1 <= sizeof(strength_icon_widths)) {
             y -= strength_icon_heights[i + 1] + 1;
         }
