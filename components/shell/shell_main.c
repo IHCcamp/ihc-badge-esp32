@@ -19,9 +19,7 @@ void shell_main(void *hwcontext)
 
     while (1) {
         painter_clear_screen(hwcontext);
-        int menu_width = painter_painted_text_width("Menu", PAINTER_FONT_REGULAR);
-        painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - menu_width) / 2, 5, "Menu", PAINTER_FONT_REGULAR, PAINTER_BLACK);
-        hwcontext_update_screen(hwcontext);
+        ui_print_menu_button_label(hwcontext, "Menu");
 
         c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
 
