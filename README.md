@@ -6,3 +6,13 @@ Make sure that you have the [ESP-IDF toolchain installed](https://docs.espressif
 make -j4
 make flash
 ```
+
+## Compiling the emulator
+Make sure that you have libsdl1.2-dev and cmake installed, then
+```
+mkdir emulator-build
+cd emulator-build
+cmake ..
+make -j4
+./Linux/ihc-badge-linux
+```
