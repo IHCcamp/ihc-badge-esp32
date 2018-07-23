@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "ihc_logo.xbm"
+#include "startup.xbm"
 
 void shell_main(void *hwcontext)
 {
@@ -31,8 +32,8 @@ void shell_main(void *hwcontext)
         "Seabed"
     };
 
+    ui_draw_animation(hwcontext, startup_frame_count, 5, startup, 0, 0, startup_width, startup_height);
     int choice = ui_show_menu(hwcontext, 11, choices, 2);
-
     ui_show_message(hwcontext, choices[choice]);
     ui_show_message(hwcontext, "Ready?");
     char *in = ui_ask_user_input(hwcontext, "Write stuff");

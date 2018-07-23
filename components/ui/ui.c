@@ -101,3 +101,12 @@ static void wait_menu_key_press(void *hwcontext)
         c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
     } while ((c != 'M') || pressed);
 }
+
+void ui_draw_animation(void *hwcontext, int framescount, int fps, const unsigned char *img_bits_frame, int x, int y, int width, int height)
+{
+    for(int i = 0; i < framescount; i++){
+        painter_draw_xbm(hwcontext, img_bits_frame + (((width + 4) * height) / 8) * i,  x, y, width, height);
+        hwcontext_update_screen(hwcontext);
+        hwcontext_delay_ms(hwcontext, (1.0 / fps) * 1000);  
+    }
+}
