@@ -21,6 +21,8 @@ void shell_main(void *hwcontext)
         painter_clear_screen(hwcontext);
         ui_print_menu_button_label(hwcontext, "Menu");
 
+        hwcontext_update_screen(hwcontext);
+
         c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
 
         if (!pressed) {
