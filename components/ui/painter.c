@@ -199,7 +199,7 @@ int painter_painted_text_width(const char *text, int style)
     while (*text) {
         int font_index = *text - 0x20;
 
-        acc = widths[font_index];
+        acc += widths[font_index];
         text++;
     }
 
