@@ -9,24 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "settings.xbm"
-
-void settings_main(struct AppContext *appctx);
-
-typedef void (*app_main_t)(struct AppContext *appctx);
-
-struct MenuEntry
-{
-    const char *title;
-    void *menu_pixmap;
-    app_main_t app_main;
-};
-
-const struct MenuEntry menu_entries[] =
-{
-    {"Settings", settings_bits, settings_main},
-    {NULL, NULL, NULL}
-};
+#include "apps/apps_list.h"
 
 static int count_menu_entries(const struct MenuEntry *entries)
 {

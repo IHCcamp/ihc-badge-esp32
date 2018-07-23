@@ -14,6 +14,7 @@ endif()
 set(SHELL_SOURCES
     shell_main.c
     shell_menu.c
+    apps/apps_list.c
 )
 
 add_library(shell ${SHELL_SOURCES})
