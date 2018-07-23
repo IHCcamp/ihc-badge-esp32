@@ -27,6 +27,7 @@ static const uint8_t strength_icon_widths[] = {
 
 static void draw_signal_status(void *hwcontext);
 static void draw_battery_status(void *hwcontext);
+static void draw_name(void *hwcontext, const char *name);
 
 void shell_main(void *hwcontext)
 {
@@ -41,6 +42,7 @@ void shell_main(void *hwcontext)
         ui_print_menu_button_label(hwcontext, "Menu");
         draw_signal_status(hwcontext);
         draw_battery_status(hwcontext);
+        draw_name(hwcontext, "Conte Mascetti");
 
         hwcontext_update_screen(hwcontext);
 
@@ -96,4 +98,10 @@ static void draw_battery_status(void *hwcontext)
             y -= strength_icon_heights[i + 1] + 1;
         }
     }
+}
+
+static void draw_name(void *hwcontext, const char *name)
+{
+    int name_width = painter_painted_text_width(name, PAINTER_FONT_BOLD);
+    painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - name_width) / 2, 2, name, PAINTER_FONT_BOLD, PAINTER_BLACK);
 }
