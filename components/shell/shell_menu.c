@@ -11,12 +11,9 @@
 
 #include "settings.xbm"
 
-typedef void (*app_main_t)(struct AppContext *appctx);
+void settings_main(struct AppContext *appctx);
 
-void settings_main(struct AppContext *appcontext)
-{
-    fprintf(stderr, "Henlo world: %p\n", appcontext);
-}
+typedef void (*app_main_t)(struct AppContext *appctx);
 
 struct MenuEntry
 {

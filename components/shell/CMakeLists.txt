@@ -21,5 +21,8 @@ set_property(TARGET shell PROPERTY C_STANDARD 99)
 
 target_link_libraries(shell
     ui
+
+    # Apps
+    settings_app
 )
 
