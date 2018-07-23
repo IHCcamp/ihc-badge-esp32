@@ -1,0 +1,4 @@
+#define signal_icon_width 5
+#define signal_icon_height 6
+static const unsigned char signal_icon_bits[] = {
+  0x1F, 0x15, 0x0E, 0x04, 0x04, 0x04, };
