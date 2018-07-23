@@ -24,14 +24,12 @@ static int count_menu_entries(const struct MenuEntry *entries)
 
 static void display_shell_menu(void *hwcontext, int current_entry)
 {
-    int select_width = painter_painted_text_width("Select", PAINTER_FONT_REGULAR);
-
     int title_width = painter_painted_text_width(menu_entries[current_entry].title, PAINTER_FONT_BOLD);
 
     painter_clear_screen(hwcontext);
     painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - title_width) / 2, 1, menu_entries[current_entry].title, PAINTER_FONT_BOLD, PAINTER_BLACK);
     painter_draw_xbm(hwcontext, menu_entries[current_entry].menu_pixmap, 10, 20, 64, 14);
-    painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - select_width) / 2, 5, "Select", PAINTER_FONT_REGULAR, PAINTER_BLACK);
+    ui_print_menu_button_label(hwcontext, "Select");
     hwcontext_update_screen(hwcontext);
 }
 
