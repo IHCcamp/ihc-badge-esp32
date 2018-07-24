@@ -130,7 +130,7 @@ void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int
     }
 }
 
-void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style, int color)
+void painter_draw_bounded_text(void *hwcontext, int x, int row, int x_bound, int y_row_bound, const char *text, int style, int color)
 {
     if ((row < 0) || (row > MAX_SCREEN_TEXT_ROWS)) {
         fprintf(stderr, "Skipping draw text outside bounds\n");
@@ -160,12 +160,12 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text, int st
         int off = offsets[font_index];
         int c_width = widths[font_index];
 
-        if (x_pos + c_width > WIDTH) {
+        if (x_pos + c_width > x_bound) {
             x_pos = x;
             row++;
             j = row * WIDTH + x;
 
-            if (row > MAX_SCREEN_TEXT_ROWS) {
+            if (row > y_row_bound) {
                 fprintf(stderr, "Text has been truncated.\n");
                 return;
             }
@@ -183,6 +183,11 @@ void painter_draw_text(void *hwcontext, int x, int row, const char *text, int st
 
         text++;
     }
+}
+
+void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style, int color)
+{
+    painter_draw_bounded_text(hwcontext, x, row, PAINTER_SCREEN_WIDTH, MAX_SCREEN_TEXT_ROWS, text, style, color);
 }
 
 int painter_painted_text_width(const char *text, int style)
