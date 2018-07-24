@@ -1,1 +1,2 @@
-# Default
+COMPONENT_SRCDIRS := . apps
+COMPONENT_ADD_INCLUDEDIRS := include apps
