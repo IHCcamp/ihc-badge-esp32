@@ -41,9 +41,13 @@ int ui_show_menu(void *hwcontext, int num_entries, const char * const *entries, 
         } else if (!pressed && (c == 'D') && (current_entry < num_entries - 1)) {
             current_entry++;
         }
-    } while ((c != 'M') || pressed);
+    } while (((c != 'M') && (c != 'C')) || pressed);
 
-    return current_entry;
+    if (c == 'C') {
+        return -1;
+    } else {
+        return current_entry;
+    }
 }
 
 void ui_print_menu_button_label(void *hwcontext, const char *label)
@@ -62,11 +66,11 @@ static void display_menu(void *hwcontext, int num_entries, const char * const *e
         int color = PAINTER_BLACK;
 
         if (i == current_visible_entry) {
-            painter_draw_fill_rect(hwcontext, 0, i * ROW_HEIGHT, PAINTER_SCREEN_WIDTH, ROW_HEIGHT - 1, PAINTER_BLACK);
+            painter_draw_fill_rect(hwcontext, 0, i * ROW_HEIGHT, PAINTER_SCREEN_WIDTH, ROW_HEIGHT, PAINTER_BLACK);
             color = PAINTER_WHITE;
         }
 
-        painter_draw_text(hwcontext, 1, i, entries[first_visible_entry + i], PAINTER_FONT_REGULAR, color);
+        painter_draw_text(hwcontext, 1, i, entries[first_visible_entry + i], PAINTER_FONT_BOLD, color);
     }
     hwcontext_update_screen(hwcontext);
 }
@@ -74,7 +78,8 @@ static void display_menu(void *hwcontext, int num_entries, const char * const *e
 char *ui_ask_user_input(void *hwcontext, const char *message)
 {
     painter_clear_screen(hwcontext);
-    painter_draw_text(hwcontext, 0, 0, message, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+    painter_draw_text(hwcontext, 1, 0, message, PAINTER_FONT_BOLD, PAINTER_BLACK);
+    ui_print_menu_button_label(hwcontext, "Ok");
     hwcontext_update_screen(hwcontext);
     char c;
     int pressed;
@@ -84,8 +89,8 @@ char *ui_ask_user_input(void *hwcontext, const char *message)
     do {
         c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
         input_consume_key_event(&es, c, pressed, &ts);
-        painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 2, PAINTER_WHITE);
-        painter_draw_text(hwcontext, 0, 2, es.buffer, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+        painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 3, PAINTER_WHITE);
+        painter_draw_text(hwcontext, 1, 2, es.buffer, PAINTER_FONT_BOLD, PAINTER_BLACK);
         hwcontext_update_screen(hwcontext);
     } while ((c != 'M') || (pressed != 0));
 

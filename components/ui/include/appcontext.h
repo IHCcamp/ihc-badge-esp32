@@ -4,6 +4,7 @@
 struct AppContext
 {
     void *hwcontext;
+    char *user_name;
 };
 
 #endif
