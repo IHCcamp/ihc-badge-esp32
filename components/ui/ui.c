@@ -78,7 +78,8 @@ static void display_menu(void *hwcontext, int num_entries, const char * const *e
 char *ui_ask_user_input(void *hwcontext, const char *message)
 {
     painter_clear_screen(hwcontext);
-    painter_draw_text(hwcontext, 0, 0, message, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+    painter_draw_text(hwcontext, 1, 0, message, PAINTER_FONT_BOLD, PAINTER_BLACK);
+    ui_print_menu_button_label(hwcontext, "Ok");
     hwcontext_update_screen(hwcontext);
     char c;
     int pressed;
@@ -88,8 +89,8 @@ char *ui_ask_user_input(void *hwcontext, const char *message)
     do {
         c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
         input_consume_key_event(&es, c, pressed, &ts);
-        painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 2, PAINTER_WHITE);
-        painter_draw_text(hwcontext, 0, 2, es.buffer, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+        painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 3, PAINTER_WHITE);
+        painter_draw_text(hwcontext, 1, 2, es.buffer, PAINTER_FONT_BOLD, PAINTER_BLACK);
         hwcontext_update_screen(hwcontext);
     } while ((c != 'M') || (pressed != 0));
 
