@@ -102,6 +102,20 @@ static void draw_battery_status(void *hwcontext)
 
 static void draw_name(void *hwcontext, const char *name)
 {
+    int x_pos = signal_icon_width + 2;
+
+    int x_bound = PAINTER_SCREEN_WIDTH - battery_icon_width - 2;
     int name_width = painter_painted_text_width(name, PAINTER_FONT_BOLD);
-    painter_draw_text(hwcontext, (PAINTER_SCREEN_WIDTH - name_width) / 2, 2, name, PAINTER_FONT_BOLD, PAINTER_BLACK);
+
+    if (name_width < x_bound - x_pos) {
+        x_pos = (PAINTER_SCREEN_WIDTH - name_width) / 2;
+    }
+
+    painter_draw_bounded_text(hwcontext,
+            x_pos, //x
+            2, // row
+            x_bound, // bound x
+            5, // bound row
+            name, PAINTER_FONT_BOLD, PAINTER_BLACK
+        );
 }
