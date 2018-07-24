@@ -62,11 +62,11 @@ static void display_menu(void *hwcontext, int num_entries, const char * const *e
         int color = PAINTER_BLACK;
 
         if (i == current_visible_entry) {
-            painter_draw_fill_rect(hwcontext, 0, i * ROW_HEIGHT, PAINTER_SCREEN_WIDTH, ROW_HEIGHT - 1, PAINTER_BLACK);
+            painter_draw_fill_rect(hwcontext, 0, i * ROW_HEIGHT, PAINTER_SCREEN_WIDTH, ROW_HEIGHT, PAINTER_BLACK);
             color = PAINTER_WHITE;
         }
 
-        painter_draw_text(hwcontext, 1, i, entries[first_visible_entry + i], PAINTER_FONT_REGULAR, color);
+        painter_draw_text(hwcontext, 1, i, entries[first_visible_entry + i], PAINTER_FONT_BOLD, color);
     }
     hwcontext_update_screen(hwcontext);
 }
