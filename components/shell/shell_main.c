@@ -1,3 +1,4 @@
+#include "appcontext.h"
 #include "hwcontext.h"
 #include "painter.h"
 #include "ui.h"
@@ -34,6 +35,8 @@ void shell_main(void *hwcontext)
     int c;
     int pressed;
     struct timespec ts;
+    struct AppContext appctx;
+    appctx.hwcontext = hwcontext;
 
     ui_draw_animation(hwcontext, startup_frame_count, 5, startup, 0, 0, startup_width, startup_height);
 
@@ -51,7 +54,7 @@ void shell_main(void *hwcontext)
         if (!pressed) {
             switch (c) {
                 case 'M':
-                    show_shell_menu(hwcontext);
+                    show_shell_menu(&appctx);
                     break;
             }
         }

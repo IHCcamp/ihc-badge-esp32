@@ -1,6 +1,5 @@
 #include "shell_menu.h"
 
-#include "appcontext.h"
 #include "hwcontext.h"
 #include "painter.h"
 #include "ui.h"
@@ -33,8 +32,9 @@ static void display_shell_menu(void *hwcontext, int current_entry)
     hwcontext_update_screen(hwcontext);
 }
 
-void show_shell_menu(void *hwcontext)
+void show_shell_menu(struct AppContext *appctx)
 {
+    void *hwcontext = appctx->hwcontext;
     int num_entries = count_menu_entries(menu_entries);
     int current_entry = 0;
 
@@ -56,9 +56,7 @@ void show_shell_menu(void *hwcontext)
     } while (((c != 'M') && ( c != 'C')) || pressed);
 
     if (c != 'C') {
-        struct AppContext appctx;
-        appctx.hwcontext = hwcontext;
-        menu_entries[current_entry].app_main(&appctx);
+        menu_entries[current_entry].app_main(appctx);
     }
 }
 
