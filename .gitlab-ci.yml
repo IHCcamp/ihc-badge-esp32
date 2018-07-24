@@ -1,0 +1,21 @@
+stages:
+  - build
+
+build_firmware:
+  image: rbino/ihc-badge-firmware-ci:snapshot
+  stage: build
+
+  script:
+    - make defconfig
+    - make -j3
+    - make size
+
+build_emulator:
+  image: rbino/ihc-badge-emulator-ci:snapshot
+  stage: build
+
+  script:
+    - mkdir emulator-build
+    - cd emulator-build
+    - cmake ..
+    - make -j3
