@@ -41,9 +41,13 @@ int ui_show_menu(void *hwcontext, int num_entries, const char * const *entries, 
         } else if (!pressed && (c == 'D') && (current_entry < num_entries - 1)) {
             current_entry++;
         }
-    } while ((c != 'M') || pressed);
+    } while (((c != 'M') && (c != 'C')) || pressed);
 
-    return current_entry;
+    if (c == 'C') {
+        return -1;
+    } else {
+        return current_entry;
+    }
 }
 
 void ui_print_menu_button_label(void *hwcontext, const char *label)
