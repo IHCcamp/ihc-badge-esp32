@@ -2,6 +2,7 @@
 #include "esp32hwcontext.h"
 #include "driver/uart.h"
 #include "esp_log.h"
+#include "nvs.h"
 
 #include <string.h>
 
@@ -13,6 +14,8 @@
 #define PRESSED_IDX 0
 #define KEY_IDX 1
 #define DELIM_IDX 2
+
+#define NVS_NS "ihcbadge"
 
 static char tag[] = "hwcontext";
 
@@ -108,4 +111,59 @@ void hwcontext_update_screen(void *hw_context)
 
 void hwcontext_delay_ms(void *hw_context, int mseconds){
     vTaskDelay(mseconds / portTICK_PERIOD_MS);
+}
+
+int hwcontext_set_nv_string(void *hwcontext, const char *key, const char *value)
+{
+    nvs_handle handle;
+    esp_err_t err = nvs_open(NVS_NS, NVS_READWRITE, &handle);
+    if (err != ESP_OK) {
+        printf("Error (%s) opening NVS handle\n", esp_err_to_name(err));
+        return -1;
+    }
+
+    err = nvs_set_str(handle, key, value);
+    if (err != ESP_OK) {
+        printf("Error (%s) writing NVS string\n", esp_err_to_name(err));
+        return -1;
+    }
+
+    err = nvs_commit(handle);
+    if (err != ESP_OK) {
+        printf("Error (%s) committing NVS string\n", esp_err_to_name(err));
+        return -1;
+    }
+
+	return 0;
+}
+
+char *hwcontext_get_nv_string(void *hwcontext, const char *key)
+{
+    nvs_handle handle;
+    esp_err_t err = nvs_open(NVS_NS, NVS_READONLY, &handle);
+    if (err != ESP_OK) {
+        printf("Error (%s) opening NVS handle\n", esp_err_to_name(err));
+        return NULL;
+    }
+
+    size_t required_length;
+    err = nvs_get_str(handle, key, NULL, &required_length);
+    if (err != ESP_OK) {
+        printf("Error (%s) reading NVS string length\n", esp_err_to_name(err));
+        return NULL;
+    }
+
+    char *ret = malloc(sizeof(char) * required_length);
+    if (!ret) {
+        printf("Memory error reading NVS string\n");
+        return NULL;
+    }
+
+    err = nvs_get_str(handle, key, ret, &required_length);
+    if (err != ESP_OK) {
+        printf("Error (%s) reading NVS string length\n", esp_err_to_name(err));
+        return NULL;
+    }
+
+    return ret;
 }
