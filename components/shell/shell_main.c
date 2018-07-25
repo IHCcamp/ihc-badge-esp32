@@ -37,7 +37,13 @@ void shell_main(void *hwcontext)
     struct timespec ts;
     struct AppContext appctx;
     appctx.hwcontext = hwcontext;
-    appctx.user_name = strdup("IHC 2018");
+
+    char *saved_name = hwcontext_get_nv_string(hwcontext, "user_name");
+    if (saved_name) {
+        appctx.user_name = saved_name;
+    } else {
+        appctx.user_name = strdup("IHC 2018");
+    }
 
     ui_draw_animation(hwcontext, startup_frame_count, 5, startup, 0, 0, startup_width, startup_height);
 
