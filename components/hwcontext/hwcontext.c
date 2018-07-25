@@ -137,32 +137,41 @@ int hwcontext_set_nv_string(void *hwcontext, const char *key, const char *value)
 	return 0;
 }
 
-char *hwcontext_get_nv_string(void *hwcontext, const char *key)
+static char *default_if_not_null(const char *default_value)
+{
+    if (default_value) {
+        return strdup(default_value);
+    } else {
+        return NULL;
+    }
+}
+
+char *hwcontext_get_nv_string(void *hwcontext, const char *key, const char *default_value)
 {
     nvs_handle handle;
     esp_err_t err = nvs_open(NVS_NS, NVS_READONLY, &handle);
     if (err != ESP_OK) {
         printf("Error (%s) opening NVS handle\n", esp_err_to_name(err));
-        return NULL;
+        return default_if_not_null(default_value);
     }
 
     size_t required_length;
     err = nvs_get_str(handle, key, NULL, &required_length);
     if (err != ESP_OK) {
         printf("Error (%s) reading NVS string length\n", esp_err_to_name(err));
-        return NULL;
+        return default_if_not_null(default_value);
     }
 
     char *ret = malloc(sizeof(char) * required_length);
     if (!ret) {
         printf("Memory error reading NVS string\n");
-        return NULL;
+        return default_if_not_null(default_value);
     }
 
     err = nvs_get_str(handle, key, ret, &required_length);
     if (err != ESP_OK) {
         printf("Error (%s) reading NVS string length\n", esp_err_to_name(err));
-        return NULL;
+        return default_if_not_null(default_value);
     }
 
     return ret;

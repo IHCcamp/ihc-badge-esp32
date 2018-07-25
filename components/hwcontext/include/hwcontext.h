@@ -9,6 +9,6 @@ uint8_t *hwcontext_get_framebuffer(void *hw_context);
 void hwcontext_update_screen(void *hw_context);
 void hwcontext_delay_ms(void *hw_context, int mseconds);
 int hwcontext_set_nv_string(void *hwcontext, const char *key, const char *value);
-char *hwcontext_get_nv_string(void *hwcontext, const char *key);
+char *hwcontext_get_nv_string(void *hwcontext, const char *key, const char *default_value);
 
 #endif
