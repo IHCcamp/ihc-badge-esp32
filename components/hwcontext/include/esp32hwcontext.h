@@ -6,6 +6,7 @@
 struct HWContext
 {
     u8g2_t *u8g2;
+    void *key_events_queue;
 };
 
 #endif
