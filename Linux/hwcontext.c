@@ -38,3 +38,19 @@ void hwcontext_delay_ms(void *hw_context, int mseconds){
 	UNUSED(hw_context);
 	usleep(mseconds * 1000);
 }
+
+int hwcontext_set_nv_string(void *hwcontext, const char *key, const char *value)
+{
+    UNUSED(hwcontext);
+    UNUSED(key);
+    UNUSED(value);
+    return -1;
+}
+
+char *hwcontext_get_nv_string(void *hwcontext, const char *key, const char *default_value)
+{
+    UNUSED(hwcontext);
+    UNUSED(key);
+    UNUSED(default_value);
+    return NULL;
+}

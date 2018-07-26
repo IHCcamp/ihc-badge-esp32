@@ -40,5 +40,6 @@ static void set_name(struct AppContext *appctx)
     if (new_name) {
         free(appctx->user_name);
         appctx->user_name = new_name;
+        hwcontext_set_nv_string(hwcontext, "user_name", new_name);
     }
 }

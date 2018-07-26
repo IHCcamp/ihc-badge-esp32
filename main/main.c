@@ -3,6 +3,7 @@
 #include "esp32hwcontext.h"
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
+#include "nvs_flash.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -52,6 +53,18 @@ void init_serial()
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, UART_BUF_SIZE * 2, 0, 0, NULL, 0));
 }
 
+void init_nvs()
+{
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES) {
+        // NVS partition was truncated and needs to be erased
+        // Retry nvs_flash_init
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK( err );
+}
+
 void app_main()
 {
     const char tag[] = "app_main";
@@ -61,6 +74,7 @@ void app_main()
     struct HWContext *hw_context = malloc(sizeof(struct HWContext));
     init_display(hw_context);
     init_serial();
+    init_nvs();
 
     shell_main(hw_context);
 }
