@@ -1,4 +1,5 @@
 #include <esp_log.h>
+#include <string.h>
 #include "driver/uart.h"
 #include "esp32hwcontext.h"
 #include "shell.h"
@@ -12,11 +13,21 @@
 #define PIN_DC 5
 #define PIN_CS 32
 
+#define UART_EVENT_QUEUE_LEN 32
+#define UART_NUM (UART_NUM_0)
 #define UART_BUF_SIZE 1024
+#define RD_BUF_SIZE (UART_BUF_SIZE)
+#define PATTERN_CHR_NUM 2
+#define MSG_LENGTH 3
+#define PRESSED_IDX 1
+#define KEY_IDX 2
 
 #define KEY_EVENTS_QUEUE_LEN 32
 
+static QueueHandle_t uart0_queue;
 static QueueHandle_t key_events_queue;
+
+const char *uart_tag = "uart_events";
 
 static void init_display(struct HWContext *hw_context) {
     u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
@@ -45,7 +56,6 @@ static void init_display(struct HWContext *hw_context) {
 
 static void init_serial()
 {
-    const int uart_num = UART_NUM_0;
     uart_config_t uart_config = {
         .baud_rate = 115200,
         .data_bits = UART_DATA_8_BITS,
@@ -54,8 +64,141 @@ static void init_serial()
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
     // Configure UART parameters
-    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
-    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, UART_BUF_SIZE * 2, 0, 0, NULL, 0));
+    ESP_ERROR_CHECK(uart_param_config(UART_NUM, &uart_config));
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM, UART_BUF_SIZE * 2, 0, UART_EVENT_QUEUE_LEN, &uart0_queue, 0));
+    ESP_ERROR_CHECK(uart_enable_pattern_det_intr(UART_NUM, '+', PATTERN_CHR_NUM, 10000, 10, 10));
+    ESP_ERROR_CHECK(uart_pattern_queue_reset(UART_NUM, UART_EVENT_QUEUE_LEN));
+}
+
+static void handle_msg(uint8_t *msg)
+{
+    // Check header
+    if (msg[0] != '$') {
+        return;
+    }
+
+    struct KeyEvent ev;
+
+    TickType_t ticks = xTaskGetTickCount();
+    ev.timestamp.tv_sec = (ticks * portTICK_PERIOD_MS) / 1000;
+    ev.timestamp.tv_nsec = ((ticks * portTICK_PERIOD_MS) % 1000) * 1000000;
+
+    switch (msg[PRESSED_IDX]) {
+        case 'D':
+            ev.pressed = 1;
+            break;
+
+        case 'U':
+            ev.pressed = 0;
+            break;
+
+        default:
+            // Invalid
+            return;
+    }
+
+    switch (msg[KEY_IDX]) {
+        // Valid keys
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+        case '*':
+        case '#':
+        case 'U':
+        case 'D':
+        case 'C':
+        case 'M':
+            ev.key = msg[KEY_IDX];
+            break;
+
+        default:
+            // Invalid
+            return;
+    }
+
+    ESP_LOGI(uart_tag, "Received key: %c pressed: %d", ev.key, ev.pressed);
+    xQueueSend(key_events_queue, (void *)&ev, portMAX_DELAY);
+}
+
+static void uart_event_task(void *pvParameters)
+{
+
+    uart_event_t event;
+    size_t buffered_size;
+    uint8_t* dtmp = (uint8_t*) malloc(RD_BUF_SIZE);
+    while (1) {
+        //Waiting for UART event.
+        if(xQueueReceive(uart0_queue, (void * )&event, (portTickType)portMAX_DELAY)) {
+            memset(dtmp, 0, RD_BUF_SIZE);
+            ESP_LOGI(uart_tag, "uart[%d] event:", UART_NUM);
+            switch(event.type) {
+                //UART_PATTERN_DET
+                case UART_PATTERN_DET:
+                    uart_get_buffered_data_len(UART_NUM, &buffered_size);
+                    int pos = uart_pattern_pop_pos(UART_NUM);
+                    if (pos < -1) {
+                        // There used to be a UART_PATTERN_DET event, but the pattern position queue is full so that it can not
+                        // record the position. We should set a larger queue size.
+                        // As an example, we directly flush the rx buffer here.
+                        uart_flush_input(UART_NUM);
+                    } else if (pos < MSG_LENGTH) {
+                        // Pattern with no full msg before, just CONSUME it
+                        uart_read_bytes(UART_NUM, dtmp, pos + PATTERN_CHR_NUM, 100 / portTICK_PERIOD_MS);
+                    } else {
+                        uart_read_bytes(UART_NUM, dtmp, pos + PATTERN_CHR_NUM, 100 / portTICK_PERIOD_MS);
+                        handle_msg(dtmp + pos - MSG_LENGTH);
+                    }
+                    break;
+                case UART_DATA:
+                    // If it's not a pattern we just read it and throw it away
+                    uart_read_bytes(UART_NUM, dtmp, event.size, portMAX_DELAY);
+                    break;
+                //Event of HW FIFO overflow detected
+                case UART_FIFO_OVF:
+                    ESP_LOGI(uart_tag, "hw fifo overflow");
+                    // If fifo overflow happened, you should consider adding flow control for your application.
+                    // The ISR has already reset the rx FIFO,
+                    // As an example, we directly flush the rx buffer here in order to read more data.
+                    uart_flush_input(UART_NUM);
+                    xQueueReset(uart0_queue);
+                    break;
+                //Event of UART ring buffer full
+                case UART_BUFFER_FULL:
+                    ESP_LOGI(uart_tag, "ring buffer full");
+                    // If buffer full happened, you should consider encreasing your buffer size
+                    // As an example, we directly flush the rx buffer here in order to read more data.
+                    uart_flush_input(UART_NUM);
+                    xQueueReset(uart0_queue);
+                    break;
+                //Event of UART RX break detected
+                case UART_BREAK:
+                    ESP_LOGI(uart_tag, "uart rx break");
+                    break;
+                //Event of UART parity check error
+                case UART_PARITY_ERR:
+                    ESP_LOGI(uart_tag, "uart parity error");
+                    break;
+                //Event of UART frame error
+                case UART_FRAME_ERR:
+                    ESP_LOGI(uart_tag, "uart frame error");
+                    break;
+                //Others
+                default:
+                    ESP_LOGI(uart_tag, "uart event type: %d", event.type);
+                    break;
+            }
+        }
+    }
+    free(dtmp);
+    dtmp = NULL;
+    vTaskDelete(NULL);
 }
 
 void init_nvs()
@@ -88,4 +231,5 @@ void app_main()
     init_nvs();
 
     xTaskCreate(shell_main, "shell_main", 8192, hw_context, 5, NULL);
+    xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
 }
