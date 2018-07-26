@@ -4,6 +4,7 @@
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
 #include "nvs_flash.h"
+#include "freertos/queue.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -12,6 +13,10 @@
 #define PIN_CS 32
 
 #define UART_BUF_SIZE 1024
+
+#define KEY_EVENTS_QUEUE_LEN 32
+
+static QueueHandle_t key_events_queue;
 
 static void init_display(struct HWContext *hw_context) {
     u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
@@ -71,7 +76,13 @@ void app_main()
 
     ESP_LOGI(tag, "*Nokia tune intensifies*");
 
+    key_events_queue = xQueueCreate(KEY_EVENTS_QUEUE_LEN, sizeof(struct KeyEvent));
+    if (!key_events_queue) {
+        ESP_LOGE(tag, "Key events queue creation failed");
+    }
+
     struct HWContext *hw_context = malloc(sizeof(struct HWContext));
+    hw_context->key_events_queue = key_events_queue;
     init_display(hw_context);
     init_serial();
     init_nvs();
