@@ -76,5 +76,5 @@ void app_main()
     init_serial();
     init_nvs();
 
-    shell_main(hw_context);
+    xTaskCreate(shell_main, "shell_main", 8192, hw_context, 5, NULL);
 }
