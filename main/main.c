@@ -13,7 +13,7 @@
 
 #define UART_BUF_SIZE 1024
 
-void init_display(struct HWContext *hw_context) {
+static void init_display(struct HWContext *hw_context) {
     u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
     u8g2_esp32_hal.clk   = PIN_CLK;
     u8g2_esp32_hal.mosi  = PIN_MOSI;
@@ -38,7 +38,7 @@ void init_display(struct HWContext *hw_context) {
     hw_context->u8g2 = u8g2;
 }
 
-void init_serial()
+static void init_serial()
 {
     const int uart_num = UART_NUM_0;
     uart_config_t uart_config = {
