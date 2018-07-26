@@ -19,12 +19,26 @@
 
 char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *timestamp)
 {
+    return hwcontext_nb_get_key_code(hwcontext, pressed, timestamp, -1);
+}
+
+int hwcontext_nb_get_key_code(void *hwcontext, int *pressed, struct timespec *timestamp, int timeoutms)
+{
     struct HWContext *hw = (struct HWContext *) hwcontext;
     struct KeyEvent ev;
-    xQueueReceive(hw->key_events_queue, (void *)&ev, portMAX_DELAY);
-    *pressed = ev.pressed;
-    *timestamp = ev.timestamp;
-    return ev.key;
+    TickType_t ticksToWait;
+    if (timeoutms < 0) {
+        ticksToWait = portMAX_DELAY;
+    } else {
+        ticksToWait = timeoutms / portTICK_PERIOD_MS;
+    }
+    if (xQueueReceive(hw->key_events_queue, (void *)&ev, ticksToWait) == pdFALSE) {
+        return -1;
+    } else {
+        *pressed = ev.pressed;
+        *timestamp = ev.timestamp;
+        return ev.key;
+    }
 }
 
 uint8_t *hwcontext_get_framebuffer(void *hw_context)
