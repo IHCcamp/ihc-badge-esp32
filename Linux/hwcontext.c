@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *timestamp)
 {
@@ -21,6 +22,26 @@ char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *time
     fprintf(stderr, "key: %c, pressed: %i\n", c, *pressed);
 
     return toupper(c & 0x7F);
+}
+
+int hwcontext_nb_get_key_code(void *hwcontext, int *pressed, struct timespec *timestamp, int timeoutms)
+{
+    struct HWContext *hw = (struct HWContext *) hwcontext;
+
+    fd_set set;
+    struct timeval timeout;
+
+    FD_ZERO(&set);
+    FD_SET(hw->data_fd, &set);
+
+    timeout.tv_sec = timeoutms / 1000;
+    timeout.tv_usec = timeoutms % 1000;
+
+    if (!select(FD_SETSIZE, &set, NULL, NULL, &timeout)) {
+        return -1;
+    }
+
+    return hwcontext_get_key_code(hwcontext, pressed, timestamp);
 }
 
 uint8_t *hwcontext_get_framebuffer(void *hw_context)
