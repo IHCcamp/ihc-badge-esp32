@@ -21,4 +21,5 @@ void painter_draw_bounded_text(void *hwcontext, int x, int row, int x_bound, int
 void painter_draw_text(void *hwcontext, int x, int row, const char *text, int style, int color);
 int painter_painted_text_width(const char *text, int style);
 
+void painter_draw_cropped_text(void *hwcontext, int x, int row, int x_bound, int y_row_bound, const char *text, int style, int color);
 #endif

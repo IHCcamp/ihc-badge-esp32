@@ -130,10 +130,69 @@ void painter_draw_xbm(void *hwcontext, const unsigned char *img_bits, int x, int
     }
 }
 
+void painter_draw_cropped_text(void *hwcontext, int x, int row, int x_bound, int y_row_bound, const char *text, int style, int color) {
+    if ((row < 0) || (row > MAX_SCREEN_TEXT_ROWS))
+        return;
+
+    const int *offsets;
+    const uint8_t *widths;
+    const uint8_t *font_data;
+
+    if (style == PAINTER_FONT_REGULAR) {
+        offsets = font_small_plain_offsets;
+        widths = font_small_plain_pixel_widths;
+        font_data = font_small_plain_font_data;
+    } else {
+        offsets = font_small_bold_offsets;
+        widths = font_small_bold_pixel_widths;
+        font_data = font_small_bold_font_data;
+    }
+
+    uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
+
+    int x_pos = x;
+    int j = row * WIDTH + x;
+    while (*text) {
+        int font_index = *text - 0x20;
+
+        int off = offsets[font_index];
+        int c_width = widths[font_index];
+
+        if (x_pos < 0) {
+            text++;
+            x_pos += c_width;
+            continue;
+        }
+
+        if (x_pos + c_width > x_bound) {
+            x_pos = x;
+            row++;
+            j = row * WIDTH + x;
+
+            if (row > y_row_bound)
+                return;
+        }
+        x_pos += c_width;
+
+        for (int i = off; i < off + c_width; i++, j++) {
+            int h_pos = j - row*WIDTH;
+            if(h_pos < 0 || h_pos > x_bound)
+                continue;
+            if (color == PAINTER_BLACK)
+                fb[j] |= font_data[i];
+            else
+                fb[j] &= ~(font_data[i]);
+        }
+
+        text++;
+    }
+}
+
 void painter_draw_bounded_text(void *hwcontext, int x, int row, int x_bound, int y_row_bound, const char *text, int style, int color)
 {
     if ((row < 0) || (row > MAX_SCREEN_TEXT_ROWS)) {
         fprintf(stderr, "Skipping draw text outside bounds\n");
+        return;
     }
 
     const int *offsets;

@@ -85,7 +85,7 @@ enum {
 
 static inline uint8_t to_snp(uint8_t x, uint8_t y) 
 { 
-    return y + (x << 3);
+    return (y & 0x07) + (x << 3);
 }
 
 static inline void from_snp(uint8_t k, uint8_t* x, uint8_t* y) 
@@ -94,8 +94,7 @@ static inline void from_snp(uint8_t k, uint8_t* x, uint8_t* y)
     *y = k & 0x07;
 }
 
-uint8_t game_area[GWIDTH * GHEIGHT];
-
+static uint8_t game_area[(GWIDTH << 3) | (GHEIGHT)];
 static int16_t snake_queue[SN_QS] = {0};
 static uint8_t game_mode = SCREEN_SPLASH;
 static int16_t sn_hpos = 0, sn_tpos = 0;
@@ -104,6 +103,7 @@ static int8_t delay = 0, max_delay = 0;
 static int8_t food_active = 0;
 static uint16_t snake_score = 0;
 static int8_t dir_has_food = 0;
+static int8_t odx=1, ody=0;
 
 enum {
     TEX_SNAKH = 0,
@@ -129,9 +129,8 @@ enum {
 
 #include "tiles.h"
 
-static inline uint8_t sn_msq_body(uint8_t o, uint8_t n)
+uint8_t sn_msq_body(uint8_t o, uint8_t n)
 {
-    static int8_t odx=1, ody=0;
 #define MSQ(a,b,c,d,r) if(dx == a && dy == b && odx == c && ody == d) ret = r
     uint8_t ret = TEX_FOOD1;
     uint8_t ox, oy, nx, ny;
@@ -244,6 +243,8 @@ void put_food()
 void game_init()
 {
     sn_hpos = 3;
+    sn_tpos = 0;
+
     memset(snake_queue, 255, sizeof(snake_queue));
     memset(game_area, GAREA_EMPTY, sizeof(game_area));
 
@@ -253,6 +254,10 @@ void game_init()
     snake_score = 0;
     delay = 0; //reset
     max_delay = 5;
+    food_active = 0;
+    dir_has_food = 0;
+    odx = 1;
+    ody = 0;
 
     game_area[snake_queue[sn_hpos]] = GAREA_SNAKE | (GAREA_SNKHR << 4);
 
@@ -381,7 +386,10 @@ void game_splash()
 {
     static int ready = 0;
     if(gKeys != 0) ready = 1;
-    if(gKeys == 0 && ready) game_mode = SCREEN_MENU;
+    if(gKeys == 0 && ready) {
+        game_mode = SCREEN_MENU;
+        ready = 0;
+    }
     
     painter_draw_xbm(hwcontext, splash_bits, 0, 0, splash_width, splash_height);
 
@@ -417,9 +425,9 @@ void game_splash()
             break;
     }
 
-    //painter_draw_cropped_text(hwcontext, cPos, 5, PAINTER_SCREEN_WIDTH,
-    //        5, names[cCurName], PAINTER_FONT_REGULAR,
-    //        PAINTER_BLACK);
+    painter_draw_cropped_text(hwcontext, cPos, 5, PAINTER_SCREEN_WIDTH,
+            5, names[cCurName], PAINTER_FONT_REGULAR,
+            PAINTER_BLACK);
 }
 
 void game_main()
@@ -439,6 +447,7 @@ void snake_main(struct AppContext *appctx)
 {
     hwcontext = appctx->hwcontext;
 
+    game_mode = SCREEN_SPLASH;
     stop_event = 0;
     while(!stop_event) {
         painter_draw_fill_rect(hwcontext, 0, 0, WIDTH-1, HEIGHT-1, 0);
