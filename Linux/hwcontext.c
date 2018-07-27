@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -72,6 +73,9 @@ char *hwcontext_get_nv_string(void *hwcontext, const char *key, const char *defa
 {
     UNUSED(hwcontext);
     UNUSED(key);
-    UNUSED(default_value);
-    return NULL;
+    if (default_value) {
+        return strdup(default_value);
+    } else {
+        return NULL;
+    }
 }
