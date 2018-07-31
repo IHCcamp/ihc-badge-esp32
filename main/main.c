@@ -10,7 +10,7 @@
 #define PIN_CLK 19
 #define PIN_MOSI 23
 #define PIN_RESET 33
-#define PIN_DC 5
+#define PIN_DC 14
 #define PIN_CS 32
 
 #define UART_EVENT_QUEUE_LEN 32
