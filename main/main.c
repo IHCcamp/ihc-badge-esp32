@@ -1,10 +1,14 @@
 #include <esp_log.h>
+#include <esp_event_loop.h>
+#include <esp_log.h>
+#include <esp_wifi.h>
 #include <string.h>
 #include "driver/uart.h"
 #include "esp32hwcontext.h"
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
 #include "nvs_flash.h"
+#include "freertos/event_groups.h"
 #include "freertos/queue.h"
 
 #define PIN_CLK 19
@@ -23,6 +27,20 @@
 #define KEY_IDX 2
 
 #define KEY_EVENTS_QUEUE_LEN 32
+
+#ifndef CONFIG_ESP_WIFI_SSID
+#define CONFIG_ESP_WIFI_SSID "IHC"
+#endif
+
+#ifndef CONFIG_ESP_WIFI_PASSWORD
+#define CONFIG_ESP_WIFI_PASSWORD "IHC2018"
+#endif
+
+static const char *wifi_tag = "WIFI";
+
+static EventGroupHandle_t wifi_event_group;
+const static int CONNECTED_BIT = BIT0;
+
 
 static QueueHandle_t uart0_queue;
 static QueueHandle_t key_events_queue;
@@ -213,6 +231,55 @@ void init_nvs()
     ESP_ERROR_CHECK( err );
 }
 
+static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
+{
+    switch (event->event_id) {
+        case SYSTEM_EVENT_STA_START:
+            ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_START received.");
+            esp_wifi_connect();
+            break;
+
+        case SYSTEM_EVENT_STA_GOT_IP:
+            ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_GOT_IP received.");
+            xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+            break;
+
+        case SYSTEM_EVENT_STA_DISCONNECTED:
+            ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_DISCONNECTED received.");
+            esp_wifi_connect();
+            xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
+            break;
+
+        default:
+            ESP_LOGI(wifi_tag, "Unhandled wifi event: %i.", event->event_id);
+            break;
+    }
+    return ESP_OK;
+}
+
+static void init_wifi(void)
+{
+    tcpip_adapter_init();
+    wifi_event_group = xEventGroupCreate();
+    ESP_ERROR_CHECK(esp_event_loop_init(wifi_event_handler, NULL));
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = CONFIG_ESP_WIFI_SSID,
+            .password = CONFIG_ESP_WIFI_PASSWORD,
+        },
+    };
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+    ESP_LOGI(wifi_tag, "start the WIFI SSID:[%s] password:[%s]", CONFIG_ESP_WIFI_SSID, "******");
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    // Use following snippet to wait for connection:
+    // xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, portMAX_DELAY);
+}
+
 void app_main()
 {
     const char tag[] = "app_main";
@@ -229,6 +296,7 @@ void app_main()
     init_display(hw_context);
     init_serial();
     init_nvs();
+    init_wifi();
 
     xTaskCreate(shell_main, "shell_main", 8192, hw_context, 5, NULL);
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
