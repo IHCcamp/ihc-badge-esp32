@@ -1,0 +1,259 @@
+#ifndef __MAX_TEX__
+#include <stdint.h>
+#define __MAX_TEX__ 17
+#endif
+
+static const uint8_t tiles[__MAX_TEX__][5] = {
+    {
+        0b11100000,
+        0b11100000,
+        0b11111110,
+        0b11101111,
+        0b11100000
+    },
+    {
+        0b11100010,
+        0b11100110,
+        0b11100110,
+        0b11100110,
+        0b11100100
+    },
+    {
+        0b11100010,
+        0b11100110,
+        0b11110100,
+        0b11111000,
+        0b11100000
+    },
+    {
+        0b11100010,
+        0b11100110,
+        0b11100101,
+        0b11100011,
+        0b11100000
+    },
+    {
+        0b11100000,
+        0b11100000,
+        0b11111100,
+        0b11111010,
+        0b11100110
+    },
+    {
+        0b11100000,
+        0b11100000,
+        0b11100011,
+        0b11100101,
+        0b11100110
+    },
+    /* MOUTH CLOSED */
+    {
+        0b11100000,
+        0b11100100,
+        0b11111010,
+        0b11111111,
+        0b11100000
+    },
+    {
+        0b11100110,
+        0b11100110,
+        0b11100101,
+        0b11100110,
+        0b11100100
+    },
+    {
+        0b11100000,
+        0b11100100,
+        0b11101011,
+        0b11111111,
+        0b11100000
+    },
+    {
+        0b11100100,
+        0b11100110,
+        0b11100101,
+        0b11100110,
+        0b11100110
+    },
+    /* MOUTH OPEN */
+    {
+        0b11100000,
+        0b11110100,
+        0b11101010,
+        0b11101111,
+        0b11110000
+    },
+    {
+        0b11101001,
+        0b11100110,
+        0b11100101,
+        0b11100110,
+        0b11100100
+    },
+    {
+        0b11100000,
+        0b11100101,
+        0b11101010,
+        0b11111110,
+        0b11100001
+    },
+    {
+        0b11100100,
+        0b11100110,
+        0b11100101,
+        0b11100110,
+        0b11101001
+    },
+    /* FOOD */
+    {
+        0b11100000,
+        0b11100100,
+        0b11101010,
+        0b11100100,
+        0b11100000
+    },
+    {
+        0b11101110,
+        0b11100100,
+        0b11111111,
+        0b11100100,
+        0b11101010
+    },
+    {
+        0b11100000,
+        0b11101110,
+        0b11111111,
+        0b11110101,
+        0b11110101
+    },
+};
+
+static const uint8_t splash_tiles[] = {
+"\xff\xff\xff\xff\xff\xff"
+"\xff\xff\xff\xff\xff\xff"
+"\xff\xff\xff\xff\xff\xff"
+"\xdf\xff\xff\xff\xff\xff"
+"\xdf\xff\xff\xff\xff\xff"
+"\xdf\xff\xff\xe3\xff\xff"
+"\xc1\xff\xff\xc1\xff\xff"
+"\xdc\x0f\xff\x9c\x7f\xff"
+"\xdf\xff\xff\x98\x1f\xff"
+"\xdf\xff\xff\x90\x07\xff"
+"\xdf\xff\x83\x80\x01\xff"
+"\xdf\xfe\x39\x80\x00\xff"
+"\xff\xfc\xbd\xc0\x01\xff"
+"\xff\xff\xbd\xe0\x01\xff"
+"\xfc\xff\xbd\xf8\x01\xff"
+"\xe0\x3f\xbd\xf0\x03\xff"
+"\xcf\x9f\x9d\xe0\x07\xff"
+"\xdf\xcf\xf9\xe0\x0f\xff"
+"\xcf\xef\xff\xe0\x1f\xff"
+"\xe7\xef\xff\xf0\x7f\xff"
+"\xf3\xef\xff\xff\xff\xff"
+"\xf9\xce\x01\xff\xff\xff"
+"\xfc\x1f\xef\xff\xff\xfb"
+"\xff\x7f\xef\xff\xff\x83"
+"\xff\xff\xe1\xff\xf1\xb7"
+"\xff\xff\xff\xff\xf5\xf7"
+"\xc0\x1f\xff\xff\xe4\xf7"
+"\xdf\xbf\xff\xff\xee\xf7"
+"\xcf\xbc\xef\xff\xee\xe7"
+"\xef\x9f\xe1\xff\xee\x0f"
+"\xef\x9f\xff\xff\x81\xff"
+"\xef\xbf\xff\xff\xf7\xff"
+"\xe7\xbf\xff\xff\xff\xff"
+"\xf7\x3f\xcf\xff\xf8\x03"
+"\xf7\x7f\xd5\xff\xf0\xff"
+"\xf2\x7f\xd5\xff\xfe\x3f"
+"\xf8\xff\xf1\xff\xff\x8f"
+"\xff\xff\xff\xff\xff\xef"
+"\xff\xff\xff\xff\xff\x0f"
+"\xfc\x7f\xff\xff\xe0\x7f"
+"\xf1\x9f\xff\xff\xff\xff"
+"\xe7\xcf\xff\xff\xff\xff"
+"\xe7\xef\xff\xff\xff\x0f"
+"\xe7\xef\xff\xff\xfe\x3f"
+"\xef\xcf\xff\xff\xc0\x7f"
+"\xf3\x1f\xff\xff\xc2\x7f"
+"\xf8\x7f\xc5\xff\xe0\xff"
+"\xff\xff\xd5\xff\xfe\x3f"
+"\xff\xff\xd5\xff\xff\xbf"
+"\xff\xff\xd9\xff\xff\xff"
+"\xf7\xff\xff\xff\xff\xff"
+"\xff\x3f\xff\xdf\xff\xff"
+"\xff\xff\xe0\x1f\xe0\x3f"
+"\xff\xff\xdb\xff\x98\xff"
+"\xff\xff\xdb\xff\xf3\x3f"
+"\xff\xff\xcb\xff\xf7\xbf"
+"\xff\xff\xe3\xff\xe7\x9f"
+"\xff\xff\xff\xff\xef\xff"
+"\xff\xff\xff\xff\xcf\xff"
+"\xff\xff\xff\xff\xf0\x7f"
+"\xff\xf8\x01\xff\xe7\x3f"
+"\xff\xff\xff\xff\xef\xbf"
+"\xff\xff\xff\xff\xec\xbf"
+"\xff\xff\xff\xff\xee\xbf"
+"\xff\xff\xff\xff\xec\xbf"
+"\xff\xff\xc8\xff\xe1\x7f"
+"\xff\xff\xd2\xff\xf2\x7f"
+"\xff\xff\xd6\xff\xfe\xff"
+"\xff\xff\xc4\xff\xff\xff"
+"\xff\xff\xe1\xff\xff\xff"
+"\xff\xff\xfb\xff\xff\xff"
+"\xff\xff\xfe\xff\xff\xff"
+"\xff\xff\xc6\xff\xff\xff"
+"\xff\xff\xd2\xff\xff\xff"
+"\xff\xff\xd8\xff\xff\xff"
+"\xff\xff\xf9\xff\xff\xff"
+"\xff\xff\xff\xff\xff\xff"
+"\xff\xf8\xff\xff\xff\xff"
+"\xff\xfe\x00\xff\xff\xff"
+"\xff\xff\xcf\xff\xff\xff"
+"\xff\xff\xe0\x7f\xff\xff"
+"\xff\xff\xff\xff\xff\xff"
+"\xff\xff\xff\xff\xff\xff"
+"\xff\xff\xff\xff\xff\xff"
+};
+
+static const uint8_t fonts_data[] = {
+	0b00011111,
+	0b00010001,
+	0b00011111,
+	0b00000000,
+	0b00000010,
+	0b00011111,
+	0b00000000,
+	0b00000000,
+	0b00011101,
+	0b00010101,
+	0b00010111,
+	0b00000000,
+	0b00010101,
+	0b00010101,
+	0b00011111,
+	0b00000000,
+	0b00000111,
+	0b00000100,
+	0b00011111,
+	0b00000000,
+	0b00010111,
+	0b00010101,
+	0b00011101,
+	0b00000000,
+	0b00011111,
+	0b00010101,
+	0b00011101,
+	0b00000000,
+	0b00000001,
+	0b00000001,
+	0b00011111,
+	0b00000000,
+	0b00011111,
+	0b00010101,
+	0b00011111,
+	0b00000000,
+	0b00010111,
+	0b00010101,
+	0b00011111,
+	0b00000000,
+};

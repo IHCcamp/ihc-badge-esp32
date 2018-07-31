@@ -26,5 +26,7 @@ target_link_libraries(shell
     # Apps
     interp_app
     settings_app
+    games_app
+    snake_app
 )
 

@@ -24,6 +24,8 @@ add_executable(ihc-badge-linux ${LINUX_SOURCES})
 target_link_libraries(ihc-badge-linux
     # Apps
     settings_app
+    games_app
+    snake_app
 
     # Libs
     ui
