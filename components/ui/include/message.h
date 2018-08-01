@@ -2,10 +2,11 @@
 #define _MESSAGE_H_
 
 #include "linkedlist.h"
+#include <time.h>
 
 struct Message
 {
-    struct ListHead messages_list_head;
+    struct ListHead message_list_head;
     const char *topic;
     const char *data;
     struct timespec timestamp;
