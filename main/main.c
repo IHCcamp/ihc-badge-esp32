@@ -10,6 +10,8 @@
 #include "nvs_flash.h"
 #include "freertos/event_groups.h"
 #include "freertos/queue.h"
+#include "mqtt_client.h"
+#include "mqtt_config.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -36,7 +38,12 @@
 #define CONFIG_ESP_WIFI_PASSWORD "IHC2018"
 #endif
 
+#ifndef CONFIG_MQTT_BROKER_URI
+#define CONFIG_MQTT_BROKER_URI "mqtt://iot.eclipse.org"
+#endif
+
 static const char *wifi_tag = "WIFI";
+static const char *mqtt_tag = "MQTT";
 
 static EventGroupHandle_t wifi_event_group;
 const static int CONNECTED_BIT = BIT0;
@@ -143,6 +150,54 @@ static void handle_msg(uint8_t *msg)
 
     ESP_LOGI(uart_tag, "Received key: %c pressed: %d", ev.key, ev.pressed);
     xQueueSend(key_events_queue, (void *)&ev, portMAX_DELAY);
+}
+
+static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
+{
+    esp_mqtt_client_handle_t client = event->client;
+    int msg_id;
+    switch (event->event_id) {
+        case MQTT_EVENT_CONNECTED:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_CONNECTED");
+            msg_id = esp_mqtt_client_subscribe(client, "#", 2);
+            ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
+            break;
+        case MQTT_EVENT_DISCONNECTED:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_DISCONNECTED");
+            break;
+
+        case MQTT_EVENT_SUBSCRIBED:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
+            msg_id = esp_mqtt_client_publish(client, "nokia/badge", "Hello world!", 0, 0, 0);
+            ESP_LOGI(mqtt_tag, "sent publish successful, msg_id=%d", msg_id);
+            break;
+        case MQTT_EVENT_UNSUBSCRIBED:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
+            break;
+        case MQTT_EVENT_PUBLISHED:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
+            break;
+        case MQTT_EVENT_DATA:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_DATA");
+            printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+            printf("DATA=%.*s\r\n", event->data_len, event->data);
+            break;
+        case MQTT_EVENT_ERROR:
+            ESP_LOGI(mqtt_tag, "MQTT_EVENT_ERROR");
+            break;
+    }
+    return ESP_OK;
+}
+
+static void mqtt_app_start(void)
+{
+    const esp_mqtt_client_config_t mqtt_cfg = {
+        .uri = CONFIG_MQTT_BROKER_URI,
+        .event_handle = mqtt_event_handler
+    };
+
+    esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
+    esp_mqtt_client_start(client);
 }
 
 static void uart_event_task(void *pvParameters)
@@ -297,6 +352,7 @@ void app_main()
     init_serial();
     init_nvs();
     init_wifi();
+    mqtt_app_start();
 
     xTaskCreate(shell_main, "shell_main", 8192, hw_context, 5, NULL);
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
