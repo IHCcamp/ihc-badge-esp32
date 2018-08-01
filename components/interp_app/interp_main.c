@@ -103,9 +103,103 @@ void interp_main(struct AppContext *appctx)
 
     char memory[512];
     memset(memory, 0, 512);
-    char *hello_world = "+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.";
 
-    char *prg_ptr = hello_world;
+    const char *hello_world = "+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.";
+    char program[512];
+    memset(program, 0, sizeof(program));
+    memcpy(program, hello_world, strlen(hello_world));
+
+    painter_clear_screen(hwcontext);
+    painter_draw_text(hwcontext, 0, 0, program, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+
+    char c;
+    int pressed;
+    unsigned int program_i = strlen(program);
+    int run = 0;
+
+    do {
+        struct timespec ts;
+        c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
+
+        if (!pressed) {
+            switch (c) {
+                case '0':
+                    program[program_i] = '>';
+                    program_i++;
+                    break;
+
+                case '1':
+                    program[program_i] = '<';
+                    program_i++;
+                    break;
+
+                case '2':
+                    program[program_i] = '+';
+                    program_i++;
+                    break;
+
+                case '3':
+                    program[program_i] = '-';
+                    program_i++;
+                    break;
+
+                case '4':
+                    program[program_i] = '.';
+                    program_i++;
+                    break;
+
+                case '5':
+                    program[program_i] = ',';
+                    program_i++;
+                    break;
+
+                case '6':
+                    program[program_i] = '[';
+                    program_i++;
+                    break;
+
+                case '7':
+                    program[program_i] = ']';
+                    program_i++;
+                    break;
+
+                case '8':
+                    program_i--;
+                    program[program_i] = '\0';
+                    break;
+
+                case '9':
+                    memset(program, 0, sizeof(program));
+                    program_i = 0;
+                    break;
+
+                case 'U':
+                    if (program_i > 0) {
+                        program_i--;
+                    }
+                    break;
+
+                case 'D':
+                    if (program_i < sizeof(program)) {
+                        program_i++;
+                    }
+                    break;
+
+                case 'M':
+                    run = 1;
+                    break;
+
+                case 'C':
+                    return;
+            }
+
+            painter_clear_screen(hwcontext);
+            painter_draw_text(hwcontext, 0, 0, program, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+        }
+    } while (!run);
+
+
+    char *prg_ptr = program;
     char *mem_ptr = memory;
     char *outbuf_ptr = outbuf;
 
