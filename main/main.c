@@ -29,12 +29,13 @@
 #define KEY_EVENTS_QUEUE_LEN 32
 
 #ifndef CONFIG_ESP_WIFI_SSID
-#define CONFIG_ESP_WIFI_SSID "IHC"
+#define CONFIG_ESP_WIFI_SSID "IHC.camp"
 #endif
 
-#ifndef CONFIG_ESP_WIFI_PASSWORD
-#define CONFIG_ESP_WIFI_PASSWORD "IHC2018"
-#endif
+// Wifi password is not set
+// #ifndef CONFIG_ESP_WIFI_PASSWORD
+// #define CONFIG_ESP_WIFI_PASSWORD "IHC2018"
+// #endif
 
 static const char *wifi_tag = "WIFI";
 
@@ -268,7 +269,7 @@ static void init_wifi(void)
     wifi_config_t wifi_config = {
         .sta = {
             .ssid = CONFIG_ESP_WIFI_SSID,
-            .password = CONFIG_ESP_WIFI_PASSWORD,
+            // NOT SET: .password = CONFIG_ESP_WIFI_PASSWORD,
         },
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
