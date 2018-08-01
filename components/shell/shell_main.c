@@ -11,6 +11,7 @@
 #include "battery_icon.xbm"
 #include "signal_icon.xbm"
 #include "startup.xbm"
+#include "logo.xbm"
 
 static const uint8_t strength_icon_heights[] = {
     6,
@@ -41,6 +42,10 @@ void shell_main(void *hwcontext)
     appctx.msgs = NULL;
 
     ui_draw_animation(hwcontext, startup_frame_count, 5, startup, 0, 0, startup_width, startup_height);
+    painter_clear_screen(hwcontext);
+    painter_draw_xbm(hwcontext, logo_bits, 0, 0, logo_width, logo_height);
+    hwcontext_update_screen(hwcontext);
+    hwcontext_delay_ms(hwcontext, 1000);
 
     while (1) {
         painter_clear_screen(hwcontext);
