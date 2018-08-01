@@ -38,6 +38,7 @@ void shell_main(void *hwcontext)
     struct AppContext appctx;
     appctx.hwcontext = hwcontext;
     appctx.user_name = hwcontext_get_nv_string(hwcontext, "user_name", "IHC 2018");
+    appctx.msgs = NULL;
 
     ui_draw_animation(hwcontext, startup_frame_count, 5, startup, 0, 0, startup_width, startup_height);
 
