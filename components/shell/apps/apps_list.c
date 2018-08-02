@@ -8,6 +8,7 @@
 #include "settings.xbm"
 #include "interp.xbm"
 #include "games.xbm"
+#include "about.xbm"
 
 const struct MenuEntry menu_entries[] =
 {
@@ -15,6 +16,7 @@ const struct MenuEntry menu_entries[] =
     {"Settings", settings_bits, settings_main},
     {"Interp.", interp_bits, interp_main},
     {"Games", games_bits, games_main},
+    {"About", about_bits, about_main},
     {NULL, NULL, NULL}
 };
 

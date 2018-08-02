@@ -31,5 +31,6 @@ target_link_libraries(shell
     settings_app
     games_app
     snake_app
+    about_app
 )
 
