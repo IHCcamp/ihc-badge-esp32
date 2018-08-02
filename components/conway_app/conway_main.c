@@ -86,10 +86,8 @@ void calculate_next_gen(void *fb, void *next_frame)
     }
 }
 
-void conway_main(struct AppContext *appctx)
+void initialize_game(void *hwcontext)
 {
-    void *hwcontext = appctx->hwcontext;
-
     painter_clear_screen(hwcontext);
     uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
 
@@ -101,18 +99,34 @@ void conway_main(struct AppContext *appctx)
         }
     }
 
-    void *next_frame = malloc((WIDTH * HEIGHT) / 8);
+    hwcontext_update_screen(hwcontext);
+}
+
+void conway_main(struct AppContext *appctx)
+{
+    void *hwcontext = appctx->hwcontext;
 
     char c;
     int pressed;
-    do {
+    struct timespec ts;
 
+    uint8_t *fb = hwcontext_get_framebuffer(hwcontext);
+
+    void *next_frame = malloc((WIDTH * HEIGHT) / 8);
+
+    initialize_game(hwcontext);
+    hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 1000);
+
+    do {
         calculate_next_gen(fb, next_frame);
         memcpy(fb, next_frame, (WIDTH * HEIGHT) / 8);
         hwcontext_update_screen(hwcontext);
 
-        struct timespec ts;
-
         c = hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 1000);
+
+        if (c == '0') {
+            initialize_game(hwcontext);
+            hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 1000);
+        }
     } while ((c != 'C') || pressed);
 }
