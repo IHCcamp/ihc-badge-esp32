@@ -5,6 +5,7 @@
 #include <string.h>
 #include "driver/uart.h"
 #include "esp32hwcontext.h"
+#include "hwcontext.h"
 #include "appcontext.h"
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
@@ -17,6 +18,7 @@
 #include "lwip/inet.h"
 #include "lwip/sockets.h"
 #include "message.h"
+#include "commands.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -60,6 +62,7 @@ static const char *mqtt_tag = "MQTT";
 static EventGroupHandle_t wifi_event_group;
 const static int CONNECTED_BIT = BIT0;
 
+static struct AppContext *appctx;
 
 static QueueHandle_t uart0_queue;
 static QueueHandle_t key_events_queue;
@@ -393,12 +396,14 @@ void app_main()
     srand(esp_random());
     init_wifi();
 
-    struct AppContext *appctx = malloc(sizeof(struct AppContext));
+    appctx = malloc(sizeof(struct AppContext));
     appctx->hwcontext = hw_context;
     appctx->user_name = NULL;
     appctx->msgs = NULL;
+    appctx->serial_number = NULL;
+    appctx->phone_number = NULL;
 
-    mqtt_app_start(appctx);
+    hwcontext_send_command(hw_context, SN_CMD, "0");
 
     xTaskCreatePinnedToCore(shell_main, "shell_main", 8192, appctx, 5, NULL, 1);
     xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL, 1);
