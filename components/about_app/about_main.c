@@ -32,8 +32,7 @@ void about_main(struct AppContext *appctx)
     
     painter_draw_xbm(hwcontext, ph_bits, 0, 0, ph_width, ph_height);
     CenterText(hwcontext, "ESP32 Firmware",0);
-    CenterText(hwcontext, "Davide",2);
-    CenterText(hwcontext, "Bettio",3);
+    CenterText(hwcontext, "Uninstall", 3);
     hwcontext_update_screen(hwcontext);
     hwcontext_delay_ms(hwcontext, A_delay);
     ui_draw_animation(hwcontext, o1_frame_count, 5, o1_bits, 0, 0, o1_width, o1_height);
