@@ -46,16 +46,16 @@ void execute_step(char **prgptr, char **memptr, char **outbuf)
             ++pp;
             break;
 
-        case '[':
+        case '(':
             if (*ptr == 0) {
                 int level = 1;
 
                 do {
                     ++pp;
-                    if (*pp == ']') {
+                    if (*pp == ')') {
                         level--;
 
-                    } else if (*pp == '[') {
+                    } else if (*pp == '(') {
                         level++;
                     }
 
@@ -66,16 +66,16 @@ void execute_step(char **prgptr, char **memptr, char **outbuf)
 
             break;
 
-        case ']':
+        case ')':
             if (*ptr) {
                 int level = 1;
 
                 do {
                     --pp;
-                    if (*pp == ']') {
+                    if (*pp == ')') {
                         level++;
 
-                    } else if (*pp == '[') {
+                    } else if (*pp == '(') {
                         level--;
                     }
                 } while (level);
@@ -104,7 +104,7 @@ void interp_main(struct AppContext *appctx)
     char memory[512];
     memset(memory, 0, 512);
 
-    const char *hello_world = "+[-[<<[+[--->]-[<<<]]]>>>-]>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.";
+    const char *hello_world = "+(-(<<(+(--->)-(<<<)))>>>-)>-.---.>..>.<<<<-.<+.>>>>>.>.<<.<-.";
     char program[512];
     memset(program, 0, sizeof(program));
     memcpy(program, hello_world, strlen(hello_world));
