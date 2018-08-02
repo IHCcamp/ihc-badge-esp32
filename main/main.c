@@ -14,6 +14,7 @@
 #include "mqtt_client.h"
 #include "mqtt_config.h"
 #include "lwip/inet.h"
+#include "lwip/sockets.h"
 #include "message.h"
 
 #define PIN_CLK 19
@@ -34,6 +35,10 @@
 #define KEY_EVENTS_QUEUE_LEN 32
 
 #define SMS_NOTIF_CMD "&&N3\n"
+
+#define DEVICE_BASE_IP "10.0.40.0"
+#define DEVICE_GW "10.0.43.254"
+#define DEVICE_NETMASK "255.255.252.0"
 
 #ifndef CONFIG_ESP_WIFI_SSID
 #define CONFIG_ESP_WIFI_SSID "IHC.camp"
@@ -334,7 +339,18 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
 
 static void init_wifi(void)
 {
+    char rand_ip[20];
     tcpip_adapter_init();
+    tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA);
+    tcpip_adapter_ip_info_t ipInfo;
+
+    sprintf(rand_ip, "10.0.%i.%i", 40 + (rand() % 4), 1 + (rand() % 250));
+
+    inet_pton(AF_INET, rand_ip, &ipInfo.ip);
+    inet_pton(AF_INET, DEVICE_GW, &ipInfo.gw);
+    inet_pton(AF_INET, DEVICE_NETMASK, &ipInfo.netmask);
+    tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);
+
     wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK(esp_event_loop_init(wifi_event_handler, NULL));
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -380,6 +396,6 @@ void app_main()
 
     mqtt_app_start(appctx);
 
-    xTaskCreate(shell_main, "shell_main", 8192, appctx, 5, NULL);
-    xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
+    xTaskCreatePinnedToCore(shell_main, "shell_main", 8192, appctx, 5, NULL, 1);
+    xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL, 1);
 }
