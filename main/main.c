@@ -13,6 +13,7 @@
 #include "freertos/queue.h"
 #include "mqtt_client.h"
 #include "mqtt_config.h"
+#include "lwip/dns.h"
 #include "lwip/inet.h"
 #include "lwip/sockets.h"
 #include "message.h"
@@ -318,6 +319,10 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
             ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_GOT_IP received");
             ESP_LOGI(wifi_tag, "IP: %s", inet_ntoa(event->event_info.got_ip.ip_info.ip));
             xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+
+            ip_addr_t dns_server;
+            inet_pton(AF_INET, "8.8.8.8", &dns_server);
+            dns_setserver(0, &dns_server);
             break;
 
         case SYSTEM_EVENT_STA_CONNECTED:
