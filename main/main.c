@@ -5,6 +5,7 @@
 #include <string.h>
 #include "driver/uart.h"
 #include "esp32hwcontext.h"
+#include "appcontext.h"
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
 #include "nvs_flash.h"
@@ -355,6 +356,11 @@ void app_main()
     init_wifi();
     mqtt_app_start();
 
-    xTaskCreate(shell_main, "shell_main", 8192, hw_context, 5, NULL);
+    struct AppContext *appctx = malloc(sizeof(struct AppContext));
+    appctx->hwcontext = hw_context;
+    appctx->user_name = NULL;
+    appctx->msgs = NULL;
+
+    xTaskCreate(shell_main, "shell_main", 8192, appctx, 5, NULL);
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
 }
