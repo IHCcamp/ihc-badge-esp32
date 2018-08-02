@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "shell_menu.h"
+#include "shell_num_input.h"
 #include "battery_icon.xbm"
 #include "signal_icon.xbm"
 #include "startup.xbm"
@@ -74,9 +75,12 @@ void shell_main(void *appcontext)
                 case '8':
                 case '9':
                 case '#':
-                case '*':
-                    ui_ask_user_num_input(hwcontext, "", "Dial", 16, c, UI_NUM_INPUT_SPECIAL_KEYS);
-                    break;
+                case '*': {
+                    char *num_input = ui_ask_user_num_input(hwcontext, "", "Dial", 16, c, UI_NUM_INPUT_SPECIAL_KEYS);
+                    shell_handle_num_input(num_input);
+                    free(num_input);
+                }
+                break;
             }
         }
     }
