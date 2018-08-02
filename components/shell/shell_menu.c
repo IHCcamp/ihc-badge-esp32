@@ -54,7 +54,7 @@ void show_shell_menu(struct AppContext *appctx)
         } else if (!pressed && (c == 'U')) {
             current_entry = num_entries - 1;
 
-        } else if (!pressed && (c == 'D') && (current_entry < num_entries - 1)) {
+        } else if (!pressed && (c == 'D')) {
             current_entry = (current_entry + 1) % num_entries;
         }
     } while (((c != 'M') && ( c != 'C')) || pressed);
