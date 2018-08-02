@@ -12,6 +12,7 @@ include_directories(
 
     include
     ../components/hwcontext/include
+    ../components/ui/include
 )
 
 set(LINUX_SOURCES
