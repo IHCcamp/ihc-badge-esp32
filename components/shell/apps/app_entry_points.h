@@ -5,5 +5,6 @@ void messages_main(struct AppContext *appctx);
 void interp_main(struct AppContext *appctx);
 void settings_main(struct AppContext *appctx);
 void games_main(struct AppContext *appctx);
+void about_main(struct AppContext *appctx);
 
 #endif

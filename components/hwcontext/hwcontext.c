@@ -17,6 +17,8 @@
 
 #define NVS_NS "ihcbadge"
 
+#define CMD_HEADER "&&"
+
 char hwcontext_get_key_code(void *hwcontext, int *pressed, struct timespec *timestamp)
 {
     return hwcontext_nb_get_key_code(hwcontext, pressed, timestamp, -1);
@@ -119,4 +121,11 @@ char *hwcontext_get_nv_string(void *hwcontext, const char *key, const char *defa
     }
 
     return ret;
+}
+
+void hwcontext_send_command(void *hwcontext, const char *command, const char *command_args)
+{
+    uart_write_bytes(UART_NUM_0, CMD_HEADER, strlen(CMD_HEADER));
+    uart_write_bytes(UART_NUM_0, command, strlen(command));
+    uart_write_bytes(UART_NUM_0, command_args, strlen(command_args));
 }

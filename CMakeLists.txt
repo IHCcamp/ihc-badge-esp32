@@ -7,6 +7,7 @@ add_subdirectory(components/interp_app)
 add_subdirectory(components/settings_app)
 add_subdirectory(components/games_app)
 add_subdirectory(components/snake_app)
+add_subdirectory(components/about_app)
 
 # Libraries
 add_subdirectory(components/ui)
