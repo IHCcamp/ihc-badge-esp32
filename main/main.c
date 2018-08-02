@@ -13,6 +13,7 @@
 #include "freertos/queue.h"
 #include "mqtt_client.h"
 #include "mqtt_config.h"
+#include "lwip/inet.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -297,8 +298,13 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
             break;
 
         case SYSTEM_EVENT_STA_GOT_IP:
-            ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_GOT_IP received.");
+            ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_GOT_IP received");
+            ESP_LOGI(wifi_tag, "IP: %s", inet_ntoa(event->event_info.got_ip.ip_info.ip));
             xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+            break;
+
+        case SYSTEM_EVENT_STA_CONNECTED:
+            ESP_LOGI(wifi_tag, "SYSTEM_EVENT_STA_CONNECTED received.");
             break;
 
         case SYSTEM_EVENT_STA_DISCONNECTED:
