@@ -104,6 +104,8 @@ void initialize_game(void *hwcontext)
 
 void conway_main(struct AppContext *appctx)
 {
+    int speed = 1000;
+
     void *hwcontext = appctx->hwcontext;
 
     char c;
@@ -115,18 +117,35 @@ void conway_main(struct AppContext *appctx)
     void *next_frame = malloc((WIDTH * HEIGHT) / 8);
 
     initialize_game(hwcontext);
-    hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 1000);
+    hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, speed);
 
     do {
         calculate_next_gen(fb, next_frame);
         memcpy(fb, next_frame, (WIDTH * HEIGHT) / 8);
         hwcontext_update_screen(hwcontext);
 
-        c = hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 1000);
+        c = hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, speed);
 
-        if (c == '0') {
-            initialize_game(hwcontext);
-            hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 1000);
+        if (!pressed) {
+            switch (c) {
+                case '0':
+                    initialize_game(hwcontext);
+                    hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, speed);
+                    break;
+
+                case 'U':
+                    if (speed >= 100) {
+                        speed -= 50;
+                    }
+                    break;
+
+                case 'D':
+                    speed += 50;
+                    break;
+
+                case 'C':
+                    return;
+            }
         }
-    } while ((c != 'C') || pressed);
+    } while (1);
 }
