@@ -79,3 +79,10 @@ char *hwcontext_get_nv_string(void *hwcontext, const char *key, const char *defa
         return NULL;
     }
 }
+
+void hwcontext_send_command(void *hwcontext, const char *command, const char *command_args)
+{
+    UNUSED(hwcontext);
+    UNUSED(command);
+    UNUSED(command_args);
+}
