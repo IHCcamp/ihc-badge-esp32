@@ -19,6 +19,7 @@
 #include "lwip/sockets.h"
 #include "message.h"
 #include "commands.h"
+#include "mbedtls/md.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -116,6 +117,28 @@ static void init_serial()
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM, UART_BUF_SIZE * 2, 0, UART_EVENT_QUEUE_LEN, &uart0_queue, 0));
     ESP_ERROR_CHECK(uart_enable_pattern_det_intr(UART_NUM, '+', PATTERN_CHR_NUM, 10000, 10, 10));
     ESP_ERROR_CHECK(uart_pattern_queue_reset(UART_NUM, UART_EVENT_QUEUE_LEN));
+}
+
+static char *phone_number(const char *payload)
+{
+    uint8_t sha_result[32];
+
+    mbedtls_md_context_t ctx;
+    mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
+
+    const size_t payload_length = strlen(payload);
+
+    mbedtls_md_init(&ctx);
+    mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 0);
+    mbedtls_md_starts(&ctx);
+    mbedtls_md_update(&ctx, (const unsigned char *) payload, payload_length);
+    mbedtls_md_finish(&ctx, sha_result);
+    mbedtls_md_free(&ctx);
+
+    char *tel_num = malloc(10);
+    sprintf(tel_num, "%i%i%i", (int) sha_result[0], (int) sha_result[1], (int) sha_result[2]);
+
+    return tel_num;
 }
 
 static void handle_serial_msg(uint8_t *msg)
