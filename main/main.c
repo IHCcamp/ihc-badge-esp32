@@ -78,6 +78,8 @@ static QueueHandle_t key_events_queue;
 
 const char *uart_tag = "uart_events";
 
+static void mqtt_app_start();
+
 static void init_display(struct HWContext *hw_context) {
     u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
     u8g2_esp32_hal.clk   = PIN_CLK;
@@ -257,6 +259,8 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_CONNECTED");
             msg_id = esp_mqtt_client_subscribe(client, "ihc/bcast", 2);
             ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
+            msg_id = esp_mqtt_client_subscribe(client, appctx->phone_number, 2);
+            ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
             break;
         case MQTT_EVENT_DISCONNECTED:
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_DISCONNECTED");
@@ -290,12 +294,13 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     return ESP_OK;
 }
 
-static void mqtt_app_start(void *appctx)
+static void mqtt_app_start()
 {
     const esp_mqtt_client_config_t mqtt_cfg = {
         .uri = CONFIG_MQTT_BROKER_URI,
         .event_handle = mqtt_event_handler,
-        .user_context = appctx
+        .user_context = appctx,
+        .client_id = appctx->serial_number,
     };
 
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
