@@ -254,12 +254,16 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
     struct AppContext *appctx = (struct AppContext *)event->user_context;
+
+    char *messages_topic = malloc(32);
+    sprintf(messages_topic, "n/%s/messages", appctx->phone_number);
+
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_CONNECTED");
             msg_id = esp_mqtt_client_subscribe(client, "ihc/bcast", 2);
             ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
-            msg_id = esp_mqtt_client_subscribe(client, appctx->phone_number, 2);
+            msg_id = esp_mqtt_client_subscribe(client, messages_topic, 2);
             ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
             break;
         case MQTT_EVENT_DISCONNECTED:
