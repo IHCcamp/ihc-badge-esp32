@@ -8,15 +8,17 @@
 #include <stdlib.h>
 
 void snake_main(struct AppContext *appctx);
+void conway_main(struct AppContext *appctx);
 
-#define CHOICES_ENTRIES 1
+#define CHOICES_ENTRIES 2
 
 void games_main(struct AppContext *appctx)
 {
     void *hwcontext = appctx->hwcontext;
 
     const char *const choices[] = {
-        "Snake"
+        "Snake",
+        "Conway"
     };
 
     int choice;
@@ -25,6 +27,9 @@ void games_main(struct AppContext *appctx)
         switch(choice) {
             case 0:
                 snake_main(appctx);
+                break;
+            case 1:
+                conway_main(appctx);
                 break;
         }
     } while (choice >= 0);
