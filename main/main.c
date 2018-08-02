@@ -393,6 +393,6 @@ void app_main()
 
     mqtt_app_start(appctx);
 
-    xTaskCreate(shell_main, "shell_main", 8192, appctx, 5, NULL);
-    xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
+    xTaskCreatePinnedToCore(shell_main, "shell_main", 8192, appctx, 5, NULL, 1);
+    xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL, 1);
 }
