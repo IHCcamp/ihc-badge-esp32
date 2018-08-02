@@ -1,3 +1,5 @@
+#include "ui.h"
+
 #include "hwcontext.h"
 #include "input.h"
 #include "painter.h"
@@ -101,6 +103,67 @@ char *ui_ask_user_input(void *hwcontext, const char *message)
     // Buffer length is last_char + 1 + 1 for NULL terminator
     size_t length = es.last_char + 2;
     return strndup(es.buffer, length);
+}
+
+char *ui_ask_user_num_input(void *hwcontext, const char *message, const char *action, int max_digits, char first_digit, int flags)
+{
+    painter_clear_screen(hwcontext);
+    painter_draw_text(hwcontext, 1, 0, message, PAINTER_FONT_BOLD, PAINTER_BLACK);
+    ui_print_menu_button_label(hwcontext, action);
+    hwcontext_update_screen(hwcontext);
+
+    char c;
+    int pressed;
+    struct timespec ts;
+
+    char *buffer = malloc(max_digits + 1);
+    memset(buffer, 0, max_digits + 1);
+    int buf_pos = 0;
+
+    if (first_digit) {
+        buffer[0] = first_digit;
+        buf_pos = 1;
+    }
+
+    painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 3, PAINTER_WHITE);
+    painter_draw_text(hwcontext, 1, 2, buffer, PAINTER_FONT_BOLD, PAINTER_BLACK);
+    hwcontext_update_screen(hwcontext);
+
+    do {
+        c = hwcontext_get_key_code(hwcontext, &pressed, &ts);
+
+        if (!pressed) {
+            if ((c >= '0') && (c <= '9') && (buf_pos < max_digits)) {
+                buffer[buf_pos] = c;
+                buffer[buf_pos + 1] = 0;
+                buf_pos++;
+
+            } else if (((c == '#') || (c == '*')) && (buf_pos < max_digits) && (flags & UI_NUM_INPUT_SPECIAL_KEYS)) {
+                buffer[buf_pos] = c;
+                buffer[buf_pos + 1] = 0;
+                buf_pos++;
+
+            } else if ((c == 'C') && (buf_pos > 0)) {
+                buf_pos--;
+                buffer[buf_pos] = 0;
+
+            } else if (c == 'C') {
+                free(buffer);
+                return NULL;
+            }
+        }
+
+        painter_draw_fill_rect(hwcontext, 0, ROW_HEIGHT * 2, PAINTER_SCREEN_WIDTH, PAINTER_SCREEN_HEIGHT - ROW_HEIGHT * 3, PAINTER_WHITE);
+        painter_draw_text(hwcontext, 1, 2, buffer, PAINTER_FONT_BOLD, PAINTER_BLACK);
+        hwcontext_update_screen(hwcontext);
+    } while ((c != 'M') || (pressed != 0));
+
+    if (!buf_pos) {
+        free(buffer);
+        return NULL;
+    }
+
+    return buffer;
 }
 
 static void wait_menu_key_press(void *hwcontext)
