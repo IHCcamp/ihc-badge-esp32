@@ -31,9 +31,17 @@
 #define UART_BUF_SIZE 1024
 #define RD_BUF_SIZE (UART_BUF_SIZE)
 #define PATTERN_CHR_NUM 2
-#define MSG_LENGTH 3
-#define PRESSED_IDX 1
+#define CMD_IDX 1
+
+#define HDR_KEY_DOWN 'D'
+#define HDR_KEY_UP 'U'
 #define KEY_IDX 2
+#define KEY_MSG_LEN 3
+
+#define HDR_SN 'S'
+#define SN_MSG_LEN 16
+#define SN_HEADER_LEN 4
+#define SN_LEN 12
 
 #define KEY_EVENTS_QUEUE_LEN 32
 
@@ -110,20 +118,24 @@ static void init_serial()
     ESP_ERROR_CHECK(uart_pattern_queue_reset(UART_NUM, UART_EVENT_QUEUE_LEN));
 }
 
-static void handle_msg(uint8_t *msg)
+static void handle_serial_msg(uint8_t *msg)
 {
-    // Check header
-    if (msg[0] != '$') {
-        return;
-    }
+    appctx->serial_number = strndup((char *)msg + SN_HEADER_LEN, SN_LEN);
+    appctx->phone_number = phone_number(appctx->serial_number);
 
+    // Now we have serial and phone, so we can start MQTT
+    mqtt_app_start();
+}
+
+static void handle_key_msg(uint8_t *msg)
+{
     struct KeyEvent ev;
 
     TickType_t ticks = xTaskGetTickCount();
     ev.timestamp.tv_sec = (ticks * portTICK_PERIOD_MS) / 1000;
     ev.timestamp.tv_nsec = ((ticks * portTICK_PERIOD_MS) % 1000) * 1000000;
 
-    switch (msg[PRESSED_IDX]) {
+    switch (msg[CMD_IDX]) {
         case 'D':
             ev.pressed = 1;
             break;
@@ -165,6 +177,51 @@ static void handle_msg(uint8_t *msg)
 
     ESP_LOGI(uart_tag, "Received key: %c pressed: %d", ev.key, ev.pressed);
     xQueueSend(key_events_queue, (void *)&ev, portMAX_DELAY);
+}
+
+static void handle_msg(uint8_t *buf, int buf_len)
+{
+    // Find header
+    int header_idx = 0;
+    while (buf[header_idx] != '$' && header_idx < buf_len) {
+        header_idx++;
+    }
+
+    if (header_idx == buf_len) {
+        // Header not found
+        return;
+    }
+
+    int msg_len = buf_len - header_idx;
+    if (msg_len < 1) {
+        // No CMD_IDX
+        return;
+    }
+
+    uint8_t *msg = malloc(msg_len);
+    memcpy(msg, buf, msg_len);
+
+    switch (msg[CMD_IDX]) {
+        case HDR_KEY_DOWN:
+        case HDR_KEY_UP:
+            if (msg_len < KEY_MSG_LEN) {
+                break;
+            }
+            handle_key_msg(msg);
+            break;
+
+        case HDR_SN:
+            if (msg_len < SN_MSG_LEN) {
+                break;
+            }
+            handle_serial_msg(msg);
+            break;
+
+        default:
+            ESP_LOGI(uart_tag, "Received unhandled message type: %c", msg[CMD_IDX]);
+    }
+
+    free(msg);
 }
 
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
@@ -243,12 +300,9 @@ static void uart_event_task(void *pvParameters)
                         // record the position. We should set a larger queue size.
                         // As an example, we directly flush the rx buffer here.
                         uart_flush_input(UART_NUM);
-                    } else if (pos < MSG_LENGTH) {
-                        // Pattern with no full msg before, just CONSUME it
-                        uart_read_bytes(UART_NUM, dtmp, pos + PATTERN_CHR_NUM, 100 / portTICK_PERIOD_MS);
                     } else {
                         uart_read_bytes(UART_NUM, dtmp, pos + PATTERN_CHR_NUM, 100 / portTICK_PERIOD_MS);
-                        handle_msg(dtmp + pos - MSG_LENGTH);
+                        handle_msg(dtmp, pos + PATTERN_CHR_NUM);
                     }
                     break;
                 case UART_DATA:
