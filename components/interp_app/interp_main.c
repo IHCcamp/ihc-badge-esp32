@@ -111,6 +111,7 @@ void interp_main(struct AppContext *appctx)
 
     painter_clear_screen(hwcontext);
     painter_draw_text(hwcontext, 0, 0, program, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+    hwcontext_update_screen(hwcontext);
 
     char c;
     int pressed;
@@ -195,6 +196,7 @@ void interp_main(struct AppContext *appctx)
 
             painter_clear_screen(hwcontext);
             painter_draw_text(hwcontext, 0, 0, program, PAINTER_FONT_REGULAR, PAINTER_BLACK);
+            hwcontext_update_screen(hwcontext);
         }
     } while (!run);
 
