@@ -5,6 +5,7 @@
 #include <string.h>
 #include "driver/uart.h"
 #include "esp32hwcontext.h"
+#include "hwcontext.h"
 #include "appcontext.h"
 #include "shell.h"
 #include "u8g2_esp32_hal.h"
@@ -17,6 +18,8 @@
 #include "lwip/inet.h"
 #include "lwip/sockets.h"
 #include "message.h"
+#include "commands.h"
+#include "mbedtls/md.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -29,9 +32,17 @@
 #define UART_BUF_SIZE 1024
 #define RD_BUF_SIZE (UART_BUF_SIZE)
 #define PATTERN_CHR_NUM 2
-#define MSG_LENGTH 3
-#define PRESSED_IDX 1
+#define CMD_IDX 1
+
+#define HDR_KEY_DOWN 'D'
+#define HDR_KEY_UP 'U'
 #define KEY_IDX 2
+#define KEY_MSG_LEN 3
+
+#define HDR_SN 'S'
+#define SN_MSG_LEN 16
+#define SN_HEADER_LEN 4
+#define SN_LEN 12
 
 #define KEY_EVENTS_QUEUE_LEN 32
 
@@ -60,11 +71,14 @@ static const char *mqtt_tag = "MQTT";
 static EventGroupHandle_t wifi_event_group;
 const static int CONNECTED_BIT = BIT0;
 
+static struct AppContext *appctx;
 
 static QueueHandle_t uart0_queue;
 static QueueHandle_t key_events_queue;
 
 const char *uart_tag = "uart_events";
+
+static void mqtt_app_start();
 
 static void init_display(struct HWContext *hw_context) {
     u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
@@ -107,20 +121,46 @@ static void init_serial()
     ESP_ERROR_CHECK(uart_pattern_queue_reset(UART_NUM, UART_EVENT_QUEUE_LEN));
 }
 
-static void handle_msg(uint8_t *msg)
+static char *phone_number(const char *payload)
 {
-    // Check header
-    if (msg[0] != '$') {
-        return;
-    }
+    uint8_t sha_result[32];
 
+    mbedtls_md_context_t ctx;
+    mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
+
+    const size_t payload_length = strlen(payload);
+
+    mbedtls_md_init(&ctx);
+    mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 0);
+    mbedtls_md_starts(&ctx);
+    mbedtls_md_update(&ctx, (const unsigned char *) payload, payload_length);
+    mbedtls_md_finish(&ctx, sha_result);
+    mbedtls_md_free(&ctx);
+
+    char *tel_num = malloc(10);
+    sprintf(tel_num, "%i%i%i", (int) sha_result[0], (int) sha_result[1], (int) sha_result[2]);
+
+    return tel_num;
+}
+
+static void handle_serial_msg(uint8_t *msg)
+{
+    appctx->serial_number = strndup((char *)msg + SN_HEADER_LEN, SN_LEN);
+    appctx->phone_number = phone_number(appctx->serial_number);
+
+    // Now we have serial and phone, so we can start MQTT
+    mqtt_app_start();
+}
+
+static void handle_key_msg(uint8_t *msg)
+{
     struct KeyEvent ev;
 
     TickType_t ticks = xTaskGetTickCount();
     ev.timestamp.tv_sec = (ticks * portTICK_PERIOD_MS) / 1000;
     ev.timestamp.tv_nsec = ((ticks * portTICK_PERIOD_MS) % 1000) * 1000000;
 
-    switch (msg[PRESSED_IDX]) {
+    switch (msg[CMD_IDX]) {
         case 'D':
             ev.pressed = 1;
             break;
@@ -164,6 +204,51 @@ static void handle_msg(uint8_t *msg)
     xQueueSend(key_events_queue, (void *)&ev, portMAX_DELAY);
 }
 
+static void handle_msg(uint8_t *buf, int buf_len)
+{
+    // Find header
+    int header_idx = 0;
+    while (buf[header_idx] != '$' && header_idx < buf_len) {
+        header_idx++;
+    }
+
+    if (header_idx == buf_len) {
+        // Header not found
+        return;
+    }
+
+    int msg_len = buf_len - header_idx;
+    if (msg_len < 1) {
+        // No CMD_IDX
+        return;
+    }
+
+    uint8_t *msg = malloc(msg_len);
+    memcpy(msg, buf, msg_len);
+
+    switch (msg[CMD_IDX]) {
+        case HDR_KEY_DOWN:
+        case HDR_KEY_UP:
+            if (msg_len < KEY_MSG_LEN) {
+                break;
+            }
+            handle_key_msg(msg);
+            break;
+
+        case HDR_SN:
+            if (msg_len < SN_MSG_LEN) {
+                break;
+            }
+            handle_serial_msg(msg);
+            break;
+
+        default:
+            ESP_LOGI(uart_tag, "Received unhandled message type: %c", msg[CMD_IDX]);
+    }
+
+    free(msg);
+}
+
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
 {
     esp_mqtt_client_handle_t client = event->client;
@@ -173,6 +258,8 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_CONNECTED");
             msg_id = esp_mqtt_client_subscribe(client, "ihc/bcast", 2);
+            ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
+            msg_id = esp_mqtt_client_subscribe(client, appctx->phone_number, 2);
             ESP_LOGI(mqtt_tag, "sent subscribe successful, msg_id=%d", msg_id);
             break;
         case MQTT_EVENT_DISCONNECTED:
@@ -207,12 +294,13 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     return ESP_OK;
 }
 
-static void mqtt_app_start(void *appctx)
+static void mqtt_app_start()
 {
     const esp_mqtt_client_config_t mqtt_cfg = {
         .uri = CONFIG_MQTT_BROKER_URI,
         .event_handle = mqtt_event_handler,
-        .user_context = appctx
+        .user_context = appctx,
+        .client_id = appctx->serial_number,
     };
 
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
@@ -240,12 +328,9 @@ static void uart_event_task(void *pvParameters)
                         // record the position. We should set a larger queue size.
                         // As an example, we directly flush the rx buffer here.
                         uart_flush_input(UART_NUM);
-                    } else if (pos < MSG_LENGTH) {
-                        // Pattern with no full msg before, just CONSUME it
-                        uart_read_bytes(UART_NUM, dtmp, pos + PATTERN_CHR_NUM, 100 / portTICK_PERIOD_MS);
                     } else {
                         uart_read_bytes(UART_NUM, dtmp, pos + PATTERN_CHR_NUM, 100 / portTICK_PERIOD_MS);
-                        handle_msg(dtmp + pos - MSG_LENGTH);
+                        handle_msg(dtmp, pos + PATTERN_CHR_NUM);
                     }
                     break;
                 case UART_DATA:
@@ -393,12 +478,14 @@ void app_main()
     srand(esp_random());
     init_wifi();
 
-    struct AppContext *appctx = malloc(sizeof(struct AppContext));
+    appctx = malloc(sizeof(struct AppContext));
     appctx->hwcontext = hw_context;
     appctx->user_name = NULL;
     appctx->msgs = NULL;
+    appctx->serial_number = NULL;
+    appctx->phone_number = NULL;
 
-    mqtt_app_start(appctx);
+    hwcontext_send_command(hw_context, SN_CMD, "0");
 
     xTaskCreatePinnedToCore(shell_main, "shell_main", 8192, appctx, 5, NULL, 1);
     xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL, 1);

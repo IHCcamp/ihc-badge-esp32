@@ -8,6 +8,8 @@ struct AppContext
     void *hwcontext;
     char *user_name;
     struct ListHead *msgs;
+    char *serial_number;
+    char *phone_number;
 };
 
 #endif
