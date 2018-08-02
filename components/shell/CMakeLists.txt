@@ -14,6 +14,7 @@ endif()
 set(SHELL_SOURCES
     shell_main.c
     shell_menu.c
+    shell_num_input.c
     apps/apps_list.c
 )
 
