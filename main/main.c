@@ -387,6 +387,7 @@ void app_main()
     init_display(hw_context);
     init_serial();
     init_nvs();
+    srand(esp_random());
     init_wifi();
 
     struct AppContext *appctx = malloc(sizeof(struct AppContext));
