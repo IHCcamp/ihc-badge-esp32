@@ -8,6 +8,7 @@ struct Message
 {
     struct ListHead message_list_head;
     const char *topic;
+    int topic_len;
     const char *data;
     struct timespec timestamp;
     int data_len;
