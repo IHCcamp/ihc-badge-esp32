@@ -1,9 +1,8 @@
 #include "appcontext.h"
 #include "hwcontext.h"
+#include "commands.h"
 #include "painter.h"
 #include "ui.h"
-
-#include "esp_log.h"
 
 #include "ph.xbm"
 #include "o1.xbm"
@@ -21,9 +20,7 @@ void about_main(struct AppContext *appctx)
 {
     void *hwcontext = appctx->hwcontext;
 
-    //ADD START RINGTONE
-    ESP_LOGI("", "&&R8");
-    //uart_write_bytes(UART_NUM, "&&R8", 4)
+    hwcontext_send_command(hwcontext, RINGTONE_CMD, "8");
 
     painter_draw_xbm(hwcontext, ph_bits, 0, 0, ph_width, ph_height);
     CenterText(hwcontext, "Idea and HW",0);
