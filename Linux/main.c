@@ -105,6 +105,7 @@ int main(int argc, char* argv[])
     appctx->hwcontext = hw;
     appctx->msgs = NULL;
     appctx->user_name = NULL;
+    appctx->phone_number = "000000000";
 
     int write_fd = fds[1];
 

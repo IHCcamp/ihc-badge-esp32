@@ -8,10 +8,12 @@
 #include "settings.xbm"
 #include "interp.xbm"
 #include "games.xbm"
+#include "phonebook.xbm"
 #include "about.xbm"
 
 const struct MenuEntry menu_entries[] =
 {
+    {"Phonebook", phonebook_bits, phonebook_main},
     {"Messages", messages_bits, messages_main},
     {"Settings", settings_bits, settings_main},
     {"Interp.", interp_bits, interp_main},
