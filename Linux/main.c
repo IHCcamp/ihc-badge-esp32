@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <unistd.h>
 
+#include "appcontext.h"
 #include "sdlhwcontext.h"
 #include "utils.h"
 
@@ -100,12 +101,17 @@ int main(int argc, char* argv[])
     memset(hw->screen_buf, 0, (WIDTH * HEIGHT / 8));
     hw->data_fd = fds[0];
 
+    struct AppContext *appctx = malloc(sizeof(struct AppContext));
+    appctx->hwcontext = hw;
+    appctx->msgs = NULL;
+    appctx->user_name = NULL;
+
     int write_fd = fds[1];
 
     pthread_t thread_id;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
-    pthread_create(&thread_id, &attr, ui_start, hw);
+    pthread_create(&thread_id, &attr, ui_start, appctx);
 
     while(!quit) {
 
