@@ -64,7 +64,7 @@ static void populate_with_subjects(const struct AppContext *appctx, char **messa
 {
     struct Message *message = GET_LIST_ENTRY(appctx->msgs, struct Message, message_list_head);
     for (int i = 0; i < len; i++) {
-        messages[i] = strdup(message->topic);
+        messages[i] = strndup(message->topic, 12);
         message = GET_LIST_ENTRY(message->message_list_head.next, struct Message, message_list_head);
     }
 }
