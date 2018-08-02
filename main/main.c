@@ -36,7 +36,7 @@
 
 #define SMS_NOTIF_CMD "&&N3\n"
 
-#define DEVICE_BASE_IP "10.0.43.15"
+#define DEVICE_BASE_IP "10.0.40.0"
 #define DEVICE_GW "10.0.43.254"
 #define DEVICE_NETMASK "255.255.252.0"
 
@@ -339,11 +339,14 @@ static esp_err_t wifi_event_handler(void *ctx, system_event_t *event)
 
 static void init_wifi(void)
 {
+    char rand_ip[20];
     tcpip_adapter_init();
     tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA);
     tcpip_adapter_ip_info_t ipInfo;
 
-    inet_pton(AF_INET, DEVICE_BASE_IP, &ipInfo.ip);
+    sprintf(rand_ip, "10.0.%i.%i", 40 + (rand() % 4), 1 + (rand() % 250));
+
+    inet_pton(AF_INET, rand_ip, &ipInfo.ip);
     inet_pton(AF_INET, DEVICE_GW, &ipInfo.gw);
     inet_pton(AF_INET, DEVICE_NETMASK, &ipInfo.netmask);
     tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);
