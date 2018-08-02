@@ -1,8 +1,11 @@
 #include "shell_num_input.h"
 
 #include <stdio.h>
+#include <stdint.h>
 
-void shell_handle_num_input(const char *num_input)
+void shell_handle_num_input(void *hwcontext, const char *num_input)
 {
-    printf("Entered: %s\n", num_input);
+    if (!num_input) {
+        return;
+    }
 }
