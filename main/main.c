@@ -51,7 +51,7 @@
 // #endif
 
 #ifndef CONFIG_MQTT_BROKER_URI
-#define CONFIG_MQTT_BROKER_URI "mqtt://iot.eclipse.org"
+#define CONFIG_MQTT_BROKER_URI "mqtt://broker.cafuddia.ml"
 #endif
 
 static const char *wifi_tag = "WIFI";
