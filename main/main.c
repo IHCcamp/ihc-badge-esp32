@@ -14,6 +14,7 @@
 #include "mqtt_client.h"
 #include "mqtt_config.h"
 #include "lwip/inet.h"
+#include "message.h"
 
 #define PIN_CLK 19
 #define PIN_MOSI 23
@@ -31,6 +32,8 @@
 #define KEY_IDX 2
 
 #define KEY_EVENTS_QUEUE_LEN 32
+
+#define SMS_NOTIF_CMD "&&N3\n"
 
 #ifndef CONFIG_ESP_WIFI_SSID
 #define CONFIG_ESP_WIFI_SSID "IHC.camp"
@@ -159,6 +162,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
 {
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
+    struct AppContext *appctx = (struct AppContext *)event->user_context;
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_CONNECTED");
@@ -184,6 +188,13 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_DATA");
             printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
             printf("DATA=%.*s\r\n", event->data_len, event->data);
+            struct Message *msg = calloc(1, sizeof(struct Message));
+            msg->topic = strdup(event->topic);
+            msg->topic_len = event->topic_len;
+            msg->data = strdup(event->data);
+            msg->data_len = event->data_len;
+            linkedlist_append(&appctx->msgs, &msg->message_list_head);
+            uart_write_bytes(UART_NUM, SMS_NOTIF_CMD, strlen(SMS_NOTIF_CMD));
             break;
         case MQTT_EVENT_ERROR:
             ESP_LOGI(mqtt_tag, "MQTT_EVENT_ERROR");
@@ -192,11 +203,12 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     return ESP_OK;
 }
 
-static void mqtt_app_start(void)
+static void mqtt_app_start(void *appctx)
 {
     const esp_mqtt_client_config_t mqtt_cfg = {
         .uri = CONFIG_MQTT_BROKER_URI,
-        .event_handle = mqtt_event_handler
+        .event_handle = mqtt_event_handler,
+        .user_context = appctx
     };
 
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
@@ -360,12 +372,13 @@ void app_main()
     init_serial();
     init_nvs();
     init_wifi();
-    mqtt_app_start();
 
     struct AppContext *appctx = malloc(sizeof(struct AppContext));
     appctx->hwcontext = hw_context;
     appctx->user_name = NULL;
     appctx->msgs = NULL;
+
+    mqtt_app_start(appctx);
 
     xTaskCreate(shell_main, "shell_main", 8192, appctx, 5, NULL);
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 5, NULL);
