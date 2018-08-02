@@ -76,8 +76,8 @@ void shell_main(void *appcontext)
                 case '9':
                 case '#':
                 case '*': {
-                    char *num_input = ui_ask_user_num_input(hwcontext, "", "Dial", 16, c, UI_NUM_INPUT_SPECIAL_KEYS);
-                    shell_handle_num_input(num_input);
+                    char *num_input = ui_ask_user_num_input(hwcontext, "", "Dial", 24, c, UI_NUM_INPUT_SPECIAL_KEYS);
+                    shell_handle_num_input(hwcontext, num_input);
                     free(num_input);
                 }
                 break;
