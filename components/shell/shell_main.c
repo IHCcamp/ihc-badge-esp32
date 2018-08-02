@@ -31,15 +31,14 @@ static void draw_signal_status(void *hwcontext);
 static void draw_battery_status(void *hwcontext);
 static void draw_name(void *hwcontext, const char *name);
 
-void shell_main(void *hwcontext)
+void shell_main(void *appcontext)
 {
     int c;
     int pressed;
     struct timespec ts;
-    struct AppContext appctx;
-    appctx.hwcontext = hwcontext;
-    appctx.user_name = hwcontext_get_nv_string(hwcontext, "user_name", "IHC 2018");
-    appctx.msgs = NULL;
+    struct AppContext *appctx = (struct AppContext *)appcontext;
+    void *hwcontext = appctx->hwcontext;
+    appctx->user_name = hwcontext_get_nv_string(hwcontext, "user_name", "IHC 2018");
 
     ui_draw_animation(hwcontext, startup_frame_count, 5, startup, 0, 0, startup_width, startup_height);
     painter_clear_screen(hwcontext);
@@ -52,7 +51,7 @@ void shell_main(void *hwcontext)
         ui_print_menu_button_label(hwcontext, "Menu");
         draw_signal_status(hwcontext);
         draw_battery_status(hwcontext);
-        draw_name(hwcontext, appctx.user_name);
+        draw_name(hwcontext, appctx->user_name);
 
         hwcontext_update_screen(hwcontext);
 
@@ -61,7 +60,7 @@ void shell_main(void *hwcontext)
         if (!pressed) {
             switch (c) {
                 case 'M':
-                    show_shell_menu(&appctx);
+                    show_shell_menu(appctx);
                     break;
             }
         }
