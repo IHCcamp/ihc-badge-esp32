@@ -62,7 +62,7 @@
 // #endif
 
 #ifndef CONFIG_MQTT_BROKER_URI
-#define CONFIG_MQTT_BROKER_URI "mqtt://broker.cafuddia.ml"
+#define CONFIG_MQTT_BROKER_URI "mqtts://broker.cafuddia.ml:8883"
 #endif
 
 static const char *wifi_tag = "WIFI";
