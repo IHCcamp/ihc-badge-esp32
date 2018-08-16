@@ -18,6 +18,7 @@ include_directories(
 set(LINUX_SOURCES
     main.c
     hwcontext.c
+    midi_ble_main.c
 )
 
 add_executable(ihc-badge-linux ${LINUX_SOURCES})
