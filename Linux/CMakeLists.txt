@@ -26,6 +26,7 @@ target_link_libraries(ihc-badge-linux
     # Apps
     settings_app
     games_app
+    multimedia_app
     snake_app
 
     # Libs
