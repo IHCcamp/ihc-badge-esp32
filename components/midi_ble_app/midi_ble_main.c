@@ -536,9 +536,22 @@ void midi_ble_main(struct AppContext *appctx)
         return;
     }
 
+    painter_clear_screen(hwcontext);
+    painter_draw_text(hwcontext, 2, 2, "Waiting for", PAINTER_FONT_BOLD, PAINTER_BLACK);
+    painter_draw_text(hwcontext, 2, 3, "connection", PAINTER_FONT_BOLD, PAINTER_BLACK);
+    hwcontext_update_screen(hwcontext);
+
     char c;
     int pressed;
     struct timespec ts;
+
+    while (!(xEventGroupWaitBits(bt_event_group, CONNECTED_BIT, false, true, portMAX_DELAY) & CONNECTED_BIT)) {
+        if (hwcontext_nb_get_key_code(hwcontext, &pressed, &ts, 0) == 'C') {
+            ble_deinit();
+            return;
+        }
+    }
+
     do {
         painter_clear_screen(hwcontext);
         char curr_octave_buf[32];
