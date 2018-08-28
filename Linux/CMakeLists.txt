@@ -18,6 +18,7 @@ include_directories(
 set(LINUX_SOURCES
     main.c
     hwcontext.c
+    midi_ble_main.c
 )
 
 add_executable(ihc-badge-linux ${LINUX_SOURCES})
@@ -26,6 +27,7 @@ target_link_libraries(ihc-badge-linux
     # Apps
     settings_app
     games_app
+    multimedia_app
     snake_app
 
     # Libs

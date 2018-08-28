@@ -2,6 +2,7 @@
 #include <esp_event_loop.h>
 #include <esp_log.h>
 #include <esp_wifi.h>
+#include <esp_bt.h>
 #include <string.h>
 #include "driver/uart.h"
 #include "esp32hwcontext.h"
@@ -463,6 +464,15 @@ static void init_wifi(void)
     // xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, portMAX_DELAY);
 }
 
+void init_bluetooth()
+{
+    // Release BT Classic memory since we will not use it
+    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+
+    esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_bt_controller_init(&bt_cfg));
+}
+
 void app_main()
 {
     const char tag[] = "app_main";
@@ -481,6 +491,7 @@ void app_main()
     init_nvs();
     srand(esp_random());
     init_wifi();
+    init_bluetooth();
 
     appctx = malloc(sizeof(struct AppContext));
     appctx->hwcontext = hw_context;

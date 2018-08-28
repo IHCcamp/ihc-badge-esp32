@@ -30,6 +30,7 @@ target_link_libraries(shell
     interp_app
     settings_app
     games_app
+    multimedia_app
     phonebook_app
     snake_app
     about_app
